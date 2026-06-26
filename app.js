@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('repDateRangeStart').value = '2026-06-01';
     document.getElementById('repDateRangeEnd').value = '2026-06-30';
     document.getElementById('repPurpose').value = '團體健身教課';
-    document.getElementById('repEmployee').value = '林憶杰';
+    const empEl = document.getElementById('repEmployee');
+    if (empEl) empEl.value = '林憶杰';
     document.getElementById('repLocation').value = '台北';
 
     // 2. Load settings, invoices and reports from localStorage
@@ -285,7 +286,10 @@ function initEventListeners() {
         'repMealDays', 'repMealRate', 'repStayDays', 'repStayRate', 'repMemo'
     ];
     reportInputs.forEach(id => {
-        document.getElementById(id).addEventListener('input', () => updateTravelReportPreview(false));
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', () => updateTravelReportPreview(false));
+        }
     });
 
     // When date range changes, automatically recalculate and fill in the transport costs
@@ -1056,7 +1060,8 @@ function updateTravelReportPreview(autoFillFromInvoices = false) {
     const repDateRangeStart = document.getElementById('repDateRangeStart').value;
     const repDateRangeEnd = document.getElementById('repDateRangeEnd').value;
     const repPurpose = document.getElementById('repPurpose').value;
-    const repEmployee = document.getElementById('repEmployee').value;
+    const repEmployeeEl = document.getElementById('repEmployee');
+    const repEmployee = repEmployeeEl ? repEmployeeEl.value : '';
     const repLocation = document.getElementById('repLocation').value || '台北';
     
     const repMealDays = parseInt(document.getElementById('repMealDays').value || 0, 10);
@@ -1422,7 +1427,8 @@ window.loadReportDirect = function(id) {
     document.getElementById('repDateRangeStart').value = report.dateRangeStart || '';
     document.getElementById('repDateRangeEnd').value = report.dateRangeEnd || '';
     document.getElementById('repPurpose').value = report.purpose || '';
-    document.getElementById('repEmployee').value = report.employee || '';
+    const empElToLoad = document.getElementById('repEmployee');
+    if (empElToLoad) empElToLoad.value = report.employee || '';
     document.getElementById('repLocation').value = report.location || '';
     
     document.getElementById('repTrainCostInput').value = report.trainCost || 0;
@@ -1456,7 +1462,8 @@ function handleSaveReport() {
     const repDateRangeStart = document.getElementById('repDateRangeStart').value;
     const repDateRangeEnd = document.getElementById('repDateRangeEnd').value;
     const repPurpose = document.getElementById('repPurpose').value;
-    const repEmployee = document.getElementById('repEmployee').value;
+    const repEmployeeEl = document.getElementById('repEmployee');
+    const repEmployee = repEmployeeEl ? repEmployeeEl.value : '';
     const repLocation = document.getElementById('repLocation').value || '台北';
     
     const trainCost = parseInt(document.getElementById('repTrainCostInput').value || 0, 10);
@@ -1479,7 +1486,9 @@ function handleSaveReport() {
     
     const grandTotal = trainCost + carCost + otherCost + mealCost + stayCost + miscCost;
     
-    if (!repEmployee) {
+    // 如果畫面上存在出差人欄位，才進行必填檢查
+    const repEmployeeElCheck = document.getElementById('repEmployee');
+    if (repEmployeeElCheck && !repEmployee) {
         alert('請輸入出差人姓名！');
         return;
     }
