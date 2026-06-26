@@ -279,6 +279,14 @@ function initEventListeners() {
     document.getElementById('filterType').addEventListener('change', renderInvoiceTable);
     document.getElementById('exportCsvBtn').addEventListener('click', exportToCsv);
 
+    // CSV Import bindings
+    const importCsvBtn = document.getElementById('btnImportCsv');
+    const csvFileInput = document.getElementById('csvFileInput');
+    if (importCsvBtn && csvFileInput) {
+        importCsvBtn.addEventListener('click', () => csvFileInput.click());
+        csvFileInput.addEventListener('change', handleCsvFileImport);
+    }
+
     // Travel Report Control Panel changes -> Instant Preview (Manual inputs, no auto-fill overwrite)
     const reportInputs = [
         'repYear', 'repMonth', 'repPurpose', 'repEmployee', 'repLocation',
@@ -1263,6 +1271,115 @@ function exportToCsv() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+function handleCsvFileImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        const text = evt.target.result;
+        importFromCsv(text);
+        // 重置以利於重複選取同個檔案
+        e.target.value = '';
+    };
+    reader.readAsText(file, 'utf-8');
+}
+
+function importFromCsv(csvText) {
+    // 移除 UTF-8 BOM
+    if (csvText.startsWith('\uFEFF')) {
+        csvText = csvText.slice(1);
+    }
+
+    const lines = csvText.split(/\r?\n/);
+    if (lines.length < 2) {
+        alert('CSV 檔案格式錯誤，或沒有任何資料列！');
+        return;
+    }
+
+    // 解析 CSV 行的 helper (支援雙引號欄位、內部逗號與換行雙引號轉義)
+    function parseCsvLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+                if (inQuotes && line[i + 1] === '"') {
+                    current += '"';
+                    i++; // 跳過轉義的雙引號
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (char === ',' && !inQuotes) {
+                result.push(current);
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        result.push(current);
+        return result;
+    }
+
+    const headers = parseCsvLine(lines[0]);
+    // 檢查欄位數量與標題
+    if (headers.length < 7 || !headers[0].includes('日期') || !headers[1].includes('類型')) {
+        alert('匯入失敗：CSV 欄位格式不符合預期的發票明細欄位 (日期,類型,發票號碼,品名事由,交通工具,地點,金額)。');
+        return;
+    }
+
+    let successCount = 0;
+    const itemsToImport = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const cells = parseCsvLine(line);
+        if (cells.length < 7) continue;
+
+        const [dateStr, typeStr, invoiceNumStr, detailStr, transportStr, locationStr, amountStr] = cells;
+        
+        const date = dateStr.trim();
+        const type = typeStr.trim();
+        const detail = detailStr.trim();
+        const amount = parseInt(amountStr.trim(), 10) || 0;
+
+        // 基本欄位有效性檢查
+        if (!date || !type || !detail) continue;
+
+        const item = {
+            id: Date.now().toString() + Math.floor(Math.random() * 1000) + '_' + i,
+            date: date,
+            type: type,
+            invoiceNumber: invoiceNumStr.trim(),
+            detail: detail,
+            amount: amount
+        };
+
+        if (type === '交通費') {
+            item.transport = transportStr.trim() || '其他';
+            item.location = locationStr.trim() || '台北';
+        }
+
+        itemsToImport.push(item);
+        successCount++;
+    }
+
+    if (itemsToImport.length === 0) {
+        alert('匯入失敗：沒有找到任何有效的發票明細資料列。');
+        return;
+    }
+
+    // 將新匯入的明細合併到 state.invoices
+    state.invoices = [...state.invoices, ...itemsToImport];
+    saveInvoicesToStorage();
+    refreshAllViews();
+
+    alert(`成功匯入 ${successCount} 筆發票明細資料！`);
 }
 
 // ==========================================================================
