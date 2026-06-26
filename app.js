@@ -1588,6 +1588,17 @@ window.loadReportDirect = function(id) {
     const empElToLoad = document.getElementById('repEmployee');
     if (empElToLoad) empElToLoad.value = report.employee || '';
     document.getElementById('repLocation').value = report.location || '';
+
+    // 填回填表日期
+    if (report.dateCreated) {
+        const d = new Date(report.dateCreated);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        document.getElementById('repReportDate').value = `${yyyy}-${mm}-${dd}`;
+    } else {
+        document.getElementById('repReportDate').value = '';
+    }
     
     document.getElementById('repTrainCostInput').value = report.trainCost || 0;
     document.getElementById('repCarCostInput').value = report.carCost || 0;
@@ -1670,7 +1681,10 @@ function handleSaveReport() {
         miscCost: miscCost,
         totalCost: grandTotal,
         memo: repMemo,
-        dateCreated: new Date().toISOString()
+        // 優先使用手選的填表日期，若無才使用今天
+        dateCreated: document.getElementById('repReportDate').value 
+            ? new Date(document.getElementById('repReportDate').value).toISOString() 
+            : new Date().toISOString()
     };
 
     state.reports.push(report);
