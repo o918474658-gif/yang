@@ -1672,11 +1672,7 @@ body {
         opacity: 0.7;
     }
     
-    /* 每頁第 3 張不要顯示剪裁線，並分頁 */
-    .batch-report-item:nth-child(3n)::after {
-        display: none !important;
-    }
-    
+    /* 每頁第 3 張也顯示剪裁線，並分頁 */
     .batch-report-item:nth-child(3n) {
         page-break-after: always;
     }
