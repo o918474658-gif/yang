@@ -706,6 +706,18 @@ function renderInvoiceTable() {
         return item.type === filterType;
     });
 
+    // 依日期由舊到新遞增排序；若日期相同則依建立時間 (ID) 排序
+    finalFiltered.sort((a, b) => {
+        const dateA = a.date || '';
+        const dateB = b.date || '';
+        if (dateA !== dateB) {
+            return dateA.localeCompare(dateB);
+        }
+        const idA = a.id || '';
+        const idB = b.id || '';
+        return idA.localeCompare(idB);
+    });
+
     if (finalFiltered.length === 0) {
         emptyState.classList.remove('hidden');
         document.getElementById('listTotalCount').innerText = '0 筆';
