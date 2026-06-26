@@ -299,16 +299,19 @@ function initEventListeners() {
     document.getElementById('repReportDate').addEventListener('change', () => updateTravelReportPreview(false));
 
     // Print Travel Report Button
-    document.getElementById('btnPrintReport').addEventListener('click', () => {
-        let printStyle = document.getElementById('print-layout-style');
-        if (!printStyle) {
-            printStyle = document.createElement('style');
-            printStyle.id = 'print-layout-style';
-            document.head.appendChild(printStyle);
-        }
-        printStyle.innerHTML = '@page { size: landscape; margin: 15mm; }';
-        window.print();
-    });
+    const btnPrintReportEl = document.getElementById('btnPrintReport');
+    if (btnPrintReportEl) {
+        btnPrintReportEl.addEventListener('click', () => {
+            let printStyle = document.getElementById('print-layout-style');
+            if (!printStyle) {
+                printStyle = document.createElement('style');
+                printStyle.id = 'print-layout-style';
+                document.head.appendChild(printStyle);
+            }
+            printStyle.innerHTML = '@page { size: landscape; margin: 15mm; }';
+            window.print();
+        });
+    }
 
     // 差旅憑證新增表單與連動事件
     const travelForm = document.getElementById('travelExpenseForm');
