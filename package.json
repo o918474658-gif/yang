@@ -1,0 +1,19 @@
+{
+  "name": "invoice-travel-assistant",
+  "version": "1.0.0",
+  "description": "發票與出差旅費整理統計工具，含 Zeabur 部署、安全登入、存檔管理與 A4 合併列印功能。",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cookie-session": "^2.1.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Antigravity",
+  "license": "ISC"
+}

@@ -1,0 +1,2108 @@
+/* ==========================================================================
+   Design System & Global Variables
+   ========================================================================== */
+:root {
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    --bg-sidebar: rgba(15, 23, 42, 0.6);
+    --card-bg: rgba(30, 41, 59, 0.45);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --glass-blur: blur(20px);
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-light: rgba(99, 102, 241, 0.15);
+    
+    --success: #10b981;
+    --success-hover: #059669;
+    --success-light: rgba(16, 185, 129, 0.15);
+    
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --danger-light: rgba(239, 68, 68, 0.15);
+    
+    --warning: #f59e0b;
+    --warning-light: rgba(245, 158, 11, 0.15);
+    
+    --border-color: rgba(255, 255, 255, 0.08);
+    --input-bg: rgba(15, 23, 42, 0.5);
+    
+    --font-sans: 'Inter', 'Noto Sans TC', sans-serif;
+    --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: #090d16;
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* App Layout */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+}
+
+/* ==========================================================================
+   Sidebar Navigation
+   ========================================================================== */
+.sidebar {
+    width: 260px;
+    background: var(--bg-sidebar);
+    backdrop-filter: var(--glass-blur);
+    border-right: 1px solid var(--card-border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    position: fixed;
+    height: 100vh;
+    z-index: 10;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    margin-bottom: 24px;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--primary);
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
+}
+
+.logo-area h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: linear-gradient(120deg, #fff, var(--text-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: left;
+    transition: var(--transition);
+}
+
+.nav-item i {
+    width: 20px;
+    height: 20px;
+    transition: var(--transition);
+}
+
+.nav-item:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.nav-item.active {
+    color: #ffffff;
+    background: var(--primary);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3), var(--shadow-glow);
+}
+
+.nav-item.active i {
+    transform: scale(1.1);
+}
+
+.sidebar-footer {
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.btn-api-settings {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.btn-api-settings:hover {
+    color: #ffffff;
+    background: var(--primary-light);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* ==========================================================================
+   Main Content Area
+   ========================================================================== */
+.main-content {
+    margin-left: 260px;
+    flex-grow: 1;
+    min-height: 100vh;
+    padding: 32px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    width: calc(100% - 260px);
+    overflow-x: auto; /* 視窗縮小時可水平滾動，確保右欄「新增差旅憑證」不會被截斷 */
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-title h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+
+.header-title p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.month-selector-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--input-bg);
+    border: 1px solid var(--card-border);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    gap: 10px;
+    transition: var(--transition);
+}
+
+.month-selector-wrapper:focus-within {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+}
+
+.month-selector-wrapper i {
+    width: 18px;
+    height: 18px;
+    color: var(--primary);
+}
+
+.input-month {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    outline: none;
+}
+
+.input-month::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+/* Tab Content Visibility */
+.tab-content {
+    display: none;
+    flex-direction: column;
+    gap: 28px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Dashboard UI Elements
+   ========================================================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon i {
+    width: 24px;
+    height: 24px;
+}
+
+/* Theme individual Stat Cards */
+.stat-card.inward .stat-icon { background: rgba(16, 185, 129, 0.12); color: var(--success); }
+.stat-card.outward .stat-icon { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
+.stat-card.travel .stat-icon { background: rgba(99, 102, 241, 0.12); color: var(--primary); }
+.stat-card.total .stat-icon { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
+.stat-card.tax .stat-icon { background: rgba(139, 92, 246, 0.12); color: #c084fc; }
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.stat-subtext {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Dashboard details layout */
+.dashboard-details-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1.8fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.detail-card {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-header h3 i {
+    color: var(--primary);
+    width: 20px;
+    height: 20px;
+}
+
+.card-body {
+    padding: 24px;
+}
+
+/* Badge styles */
+.badge {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 20px;
+}
+
+.ai-badge {
+    background: var(--primary-light);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+/* Dropzone style */
+.dropzone {
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-lg);
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: rgba(15, 23, 42, 0.2);
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.dropzone:hover, .dropzone.dragover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.dropzone-icon {
+    width: 44px;
+    height: 44px;
+    color: var(--primary);
+    margin-bottom: 12px;
+    transition: var(--transition);
+}
+
+.dropzone:hover .dropzone-icon {
+    transform: translateY(-4px);
+}
+
+.dropzone p {
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.dropzone p span {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.dropzone-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.file-input-hidden {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Warning Banner */
+.api-warning-banner {
+    display: flex;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--warning-light);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: var(--radius-md);
+    color: #fbbf24;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    margin-top: 16px;
+}
+
+.api-warning-banner i {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Recent list style */
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.recent-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.recent-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.item-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.item-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Icon classes based on invoice type */
+.type-inward { background: var(--success-light); color: var(--success); }
+.type-outward { background: var(--danger-light); color: var(--danger); }
+.type-travel { background: var(--primary-light); color: var(--primary); }
+.type-other { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+
+.item-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.item-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.item-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.item-right {
+    text-align: right;
+}
+
+.item-price {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   Invoice Workspace Layout
+   ========================================================================== */
+.invoice-workspace {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.workspace-sidebar {
+    position: sticky;
+    top: 24px;
+}
+
+/* Mini Dropzone for Invoice List page */
+.mini-dropzone {
+    border: 2px dashed rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(15, 23, 42, 0.15);
+    margin-bottom: 16px;
+    transition: var(--transition);
+    position: relative;
+}
+
+.mini-dropzone:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.mini-dropzone-icon {
+    width: 28px;
+    height: 28px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.mini-dropzone p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Preview Image in Sidebar */
+.preview-container {
+    width: 100%;
+    height: 160px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.preview-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-remove-preview {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.8);
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-remove-preview:hover {
+    background: var(--danger);
+}
+
+/* Loader Overlay */
+.ocr-progress-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.ocr-progress-overlay span {
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Form Styles */
+.invoice-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.form-group label .required {
+    color: var(--danger);
+    margin-left: 2px;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    font-family: var(--font-sans);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+    outline: none;
+    width: 100%;
+}
+
+.form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.form-group input:focus, 
+.form-group select:focus, 
+.form-group textarea:focus {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-glow);
+}
+
+/* Row-based Form Fields */
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.col-6 { width: 50%; }
+.col-4 { width: 33.333%; }
+.col-3 { width: 25%; }
+
+/* Extra Fields for Transport */
+.transport-fields {
+    border-left: 3px solid var(--primary);
+    padding-left: 12px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Button UI Components */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+    font-family: var(--font-sans);
+}
+
+.w-full { width: 100%; }
+.flex-1 { flex: 1; }
+.justify-center { justify-content: center; }
+.relative { position: relative; }
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+.btn-primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn-success {
+    background: var(--success);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+.btn-success:hover {
+    background: var(--success-hover);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+.btn-danger:hover {
+    background: var(--danger-hover);
+}
+
+.btn-link {
+    background: transparent;
+    border: none;
+    color: var(--primary);
+    padding: 0;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+.btn-icon-only {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon-only:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================================================
+   Data Table Elements
+   ========================================================================== */
+.table-title-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.count-badge {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-secondary);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.table-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.input-select {
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: var(--radius-md);
+    outline: none;
+    font-family: var(--font-sans);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.88rem;
+}
+
+.data-table th {
+    background: rgba(15, 23, 42, 0.25);
+    padding: 14px 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.5px;
+}
+
+.data-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.data-table tbody tr {
+    transition: var(--transition);
+}
+
+.data-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.font-bold { font-weight: 700; }
+
+.table-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    background: rgba(15, 23, 42, 0.15);
+}
+
+.table-footer strong {
+    font-size: 1.15rem;
+    color: var(--success);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.btn-table-edit {
+    background: rgba(99, 102, 241, 0.1);
+    color: #818cf8;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-table-edit:hover {
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-table-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-table-delete:hover {
+    background: var(--danger);
+    color: #fff;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.empty-state i {
+    width: 48px;
+    height: 48px;
+    color: rgba(255,255,255,0.06);
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+}
+
+.hidden { display: none !important; }
+
+/* ==========================================================================
+   Report Workspace & Paper Sheet
+   ========================================================================== */
+.report-workspace {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.report-control-sidebar {
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.report-control-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+.report-control-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.report-control-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+.report-control-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.margin-top-md {
+    margin-top: 20px;
+}
+
+.report-preview-container {
+    background: #e2e8f0;
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Printable paper sheet mock (A4 Landscape aspect) */
+.paper-page {
+    background: #ffffff;
+    color: #000000;
+    width: 1000px;
+    min-height: 600px;
+    padding: 36px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border-radius: 4px;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", "Heiti TC", "Helvetica Neue", sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* 模擬手寫填入欄位樣式 */
+.user-fill {
+    font-family: "DFKai-SB", "BiauKai", "標楷體", "KaiTi", "Times New Roman", serif !important;
+    font-weight: 600 !important; /* 模擬原子筆或鋼筆填寫的適中粗細 */
+    color: #000000 !important;
+}
+
+/* Title container with Double Underline */
+.report-title-section {
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.double-underline-container {
+    display: inline-block;
+    border-bottom: 3px double #000;
+    padding-bottom: 4px;
+    margin-bottom: 12px;
+}
+
+.report-main-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    margin: 0;
+}
+
+.report-date-row {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.fill-line {
+    display: inline-block;
+    border-bottom: 1px solid #000;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Classical Grid Table Layout */
+.report-grid-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #000000;
+    margin-bottom: 24px;
+    font-size: 13px;
+}
+
+.report-grid-table td, 
+.report-grid-table th {
+    border: 1px solid #000000;
+    height: 32px;
+    padding: 4px 6px;
+    color: #000000;
+}
+
+/* Double vertical borders like old style ledger tables */
+.col-summary-label, 
+.sub-summary-label, 
+.item-label {
+    border-left: 2px solid #000000 !important;
+}
+
+.col-amount-label, 
+.item-amount {
+    border-left: 2px solid #000000 !important;
+}
+
+.col-route-val {
+    vertical-align: middle !important;
+    text-align: left !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    letter-spacing: 6px !important;
+    padding-left: 24px !important;
+}
+.col-purpose-val.user-fill {
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+}
+.col-memo-val.user-fill {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+}
+
+/* Internal detailed itinerary style */
+.sub-itinerary-table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    border: none;
+}
+
+.sub-itinerary-table th {
+    background: transparent;
+    font-size: 11px;
+    border: none;
+    border-bottom: 1px solid #000000;
+    padding: 4px;
+}
+
+.sub-itinerary-table td {
+    border: none;
+    border-bottom: 1px dashed #777777;
+    height: 26px;
+    padding: 2px 4px;
+    font-size: 11px;
+}
+
+.sub-itinerary-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Specific alignments */
+.report-grid-table .item-amount {
+    font-family: "DFKai-SB", "BiauKai", "標楷體", "KaiTi", "Courier New", Courier, monospace !important;
+    font-weight: 700 !important;
+    padding-right: 8px;
+    font-size: 14px !important;
+}
+#lblTotalCost.user-fill {
+    font-size: 16px !important; /* 合計金額字體稍微加大 */
+}
+
+/* Signatures layout */
+.sign-off-area {
+    display: flex;
+    width: 100%;
+    border: 1.5px solid #000000;
+    margin-top: 10px;
+}
+
+.sign-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 1.5px solid #000000;
+    height: 64px;
+}
+
+.sign-column:last-child {
+    border-right: none;
+}
+
+.sign-title {
+    background: #f1f5f9;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    border-bottom: 1px solid #000000;
+    padding: 4px 0;
+}
+
+.sign-value {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px; /* 簽字大一點，看起來更自然真實 */
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Modals & Overlays
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(9, 13, 22, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-card {
+    background: #1e293b;
+    border: 1px solid var(--card-border);
+    width: 520px;
+    max-width: 90%;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: var(--transition);
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header h3 i {
+    color: var(--primary);
+}
+
+.btn-close-modal {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.btn-close-modal:hover {
+    color: #fff;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-intro {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.api-key-input-wrapper {
+    display: flex;
+    position: relative;
+    align-items: center;
+}
+
+.api-key-input-wrapper input {
+    padding-right: 48px;
+}
+
+.btn-toggle-visibility {
+    position: absolute;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.btn-toggle-visibility:hover {
+    color: var(--text-primary);
+}
+
+.guide-box {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-top: 20px;
+}
+
+.guide-box h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.guide-box ol {
+    padding-left: 20px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.guide-box a {
+    color: #818cf8;
+    text-decoration: none;
+}
+
+.guide-box a:hover {
+    text-decoration: underline;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    background: rgba(15, 23, 42, 0.2);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* ==========================================================================
+   Camera Modal Customization
+   ========================================================================== */
+.modal-camera-card {
+    width: 640px;
+}
+
+.camera-video-stream {
+    width: 100%;
+    height: 400px;
+    background: #000;
+    object-fit: cover;
+}
+
+.camera-guideline-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.guideline-box {
+    width: 80%;
+    height: 60%;
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 16px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.1);
+}
+
+.btn-capture {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-capture i {
+    width: 32px;
+    height: 32px;
+}
+
+.margin-top-lg {
+    margin-top: 24px;
+}
+
+/* Quick Itinerary List styles */
+.quick-itin-list-wrapper {
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+}
+
+.quick-list-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.quick-itin-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.quick-itin-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    transition: var(--transition);
+}
+
+.quick-itin-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.qi-item-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.qi-item-route {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.qi-item-meta {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.qi-item-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.qi-item-amount {
+    font-weight: 700;
+    color: var(--success);
+}
+
+.btn-qi-delete {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.btn-qi-delete:hover {
+    color: var(--danger);
+    background: var(--danger-light);
+}
+
+/* 登出與歷史管理列表網頁樣式 */
+.btn-logout-sidebar {
+    background: rgba(239, 68, 68, 0.05) !important;
+    border: 1px solid rgba(239, 68, 68, 0.15) !important;
+    color: #f87171 !important;
+}
+.btn-logout-sidebar:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #ef4444 !important;
+}
+.reports-list-card {
+    width: 100%;
+}
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+#batchPrintContainer {
+    display: none;
+}
+
+/* ==========================================================================
+   Print Style Layout
+   ========================================================================== */
+@media print {
+    /* Hide all layout elements of Web App */
+    .sidebar,
+    .main-header,
+    .report-control-sidebar,
+    .btn,
+    .modal-overlay,
+    aside,
+    header,
+    button,
+    #savedReportsCard {
+        display: none !important;
+    }
+    
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+    
+    .app-container {
+        background: none !important;
+        display: block !important;
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 0 !important;
+        background: none !important;
+    }
+    
+    .tab-content {
+        display: none !important;
+    }
+    
+    /* Make sure report tab content behaves correctly */
+    #tab-travel-report {
+        display: block !important;
+    }
+    
+    .report-workspace {
+        display: block !important;
+    }
+    
+    .report-preview-container {
+        background: none !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        display: block !important;
+    }
+    
+    .paper-page {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        min-height: auto !important;
+        background: #fff !important;
+        color: #000 !important;
+        page-break-inside: avoid;
+    }
+
+    .report-grid-table {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        border: 2px solid #000000 !important;
+    }
+
+    .report-grid-table td, 
+    .report-grid-table th {
+        border: 1px solid #000000 !important;
+    }
+    
+    .sign-column {
+        border-right: 1.5px solid #000000 !important;
+    }
+    
+    .sign-title {
+        background-color: #f1f5f9 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* ==========================================================================
+       合併列印專用 (3合1 A4直式排版)
+       ========================================================================== */
+    /* 預設列印單張時隱藏 batchPrintContainer */
+    #batchPrintContainer {
+        display: none !important;
+    }
+    
+    /* 當 body 有 batch-printing class 時進行特別排版 */
+    body.batch-printing .app-container {
+        display: none !important; /* 隱藏原本的整個應用程式容器，避免任何隱形高度造成空白頁 */
+    }
+    
+    body.batch-printing #batchPrintContainer {
+        display: block !important; /* 顯示合併列印容器 */
+    }
+    
+    body.batch-printing {
+        background: #ffffff !important;
+    }
+    
+    .batch-report-item {
+        width: 100%;
+        height: 360px; /* 3張大約高度，能在一張 A4 直向完美塞入 */
+        overflow: hidden;
+        position: relative;
+        page-break-inside: avoid;
+        background: #ffffff !important;
+    }
+    
+    .batch-report-item .paper-page {
+        width: 1000px !important;
+        height: 560px !important; /* 強制固定高度，保證三張表裁剪尺寸絕對一致 */
+        min-height: 560px !important;
+        max-height: 560px !important;
+        overflow: hidden !important;
+        transform: scale(0.62) !important;
+        transform-origin: top center;
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 5px !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    .batch-report-item .report-grid-table {
+        border: 2px solid #000000 !important;
+        background: #ffffff !important;
+    }
+
+    .batch-report-item .report-grid-table td, 
+    .batch-report-item .report-grid-table th {
+        border: 1px solid #000000 !important;
+    }
+    
+    /* 精緻的裁切虛線樣式 */
+    .batch-report-item::after {
+        content: "✂ 剪裁線 ────────────────────────────────────────────────────────────";
+        font-size: 10px;
+        color: #000000;
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        letter-spacing: 2px;
+        opacity: 0.7;
+    }
+    
+    /* 每頁第 3 張不要顯示剪裁線，並分頁 */
+    .batch-report-item:nth-child(3n)::after {
+        display: none !important;
+    }
+    
+    .batch-report-item:nth-child(3n) {
+        page-break-after: always;
+    }
+}
+
+/* ==========================================================================
+   ✨ 高質感尊榮級 UI 介面全面優化
+   ========================================================================== */
+
+/* 1. 右側歷史卡片面板磨砂玻璃美化 */
+#savedReportsCard {
+    background: rgba(30, 41, 59, 0.45) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
+    border-radius: var(--radius-lg) !important;
+    margin-top: 0 !important; /* 清除頂部 margin，依靠 wrapper 的 gap */
+}
+
+#savedReportsCard .card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding: 16px 20px !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background: rgba(15, 23, 42, 0.1) !important;
+}
+
+#savedReportsCard .card-header h3 {
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    color: #f8fafc !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 !important;
+}
+
+/* 合併列印按鈕微調為炫彩漸層 */
+#btnBatchPrintReports {
+    background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 500 !important;
+    font-size: 0.82rem !important;
+    padding: 7px 14px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease-in-out !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25) !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#btnBatchPrintReports:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4), 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+    background: linear-gradient(135deg, #818cf8, #6366f1) !important;
+}
+
+#btnBatchPrintReports:active {
+    transform: translateY(1px) !important;
+}
+
+/* 2. 已儲存表格高質感美化 */
+#savedReportsTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    color: #e2e8f0;
+}
+
+#savedReportsTable th {
+    background: rgba(15, 23, 42, 0.25) !important;
+    color: #94a3b8 !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    font-weight: 600 !important;
+}
+
+#savedReportsTable td {
+    padding: 12px 16px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+    font-weight: 400 !important;
+    vertical-align: middle;
+}
+
+#savedReportsTable tbody tr {
+    transition: all 0.2s ease !important;
+}
+
+#savedReportsTable tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* 歷史清單中核取方塊樣式 */
+#savedReportsTable input[type="checkbox"] {
+    accent-color: #6366f1 !important;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* 表格中操作按鈕精緻化 */
+#savedReportsTable .btn-table-edit {
+    background: rgba(99, 102, 241, 0.12) !important;
+    color: #818cf8 !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease !important;
+}
+
+#savedReportsTable .btn-table-edit:hover {
+    background: var(--primary) !important;
+    color: #ffffff !important;
+    border-color: var(--primary) !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3) !important;
+}
+
+#savedReportsTable .btn-table-delete {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease !important;
+}
+
+#savedReportsTable .btn-table-delete:hover {
+    background: var(--danger) !important;
+    color: #ffffff !important;
+    border-color: var(--danger) !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3) !important;
+}
+
+.report-control-sidebar {
+    position: sticky !important;
+    top: 15px !important;
+    height: calc(100vh - 70px) !important; /* 強制固定高度，擺脫 parent 矮內容限制，使其必定可滾動 */
+    max-height: calc(100vh - 70px) !important;
+    overflow-y: auto !important;
+    background: rgba(30, 41, 59, 0.35) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 16px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 10 !important; /* 確保在最上層，滑鼠點選與輸入不被遮擋 */
+}
+
+.report-control-sidebar .detail-card {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.report-control-sidebar .card-header {
+    padding: 0 0 12px 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    margin-bottom: 12px !important;
+}
+
+.report-control-sidebar .card-header h3 {
+    font-size: 1.05rem !important;
+}
+
+.report-control-sidebar .form-group {
+    gap: 4px !important;
+    margin-bottom: 5px !important;
+}
+
+.report-control-sidebar .form-group label {
+    font-size: 0.76rem !important;
+    color: #94a3b8 !important;
+    font-weight: 500 !important;
+}
+
+.report-control-sidebar input, 
+.report-control-sidebar select, 
+.report-control-sidebar textarea {
+    padding: 6px 10px !important;
+    font-size: 0.82rem !important;
+    height: auto !important;
+    background: rgba(15, 23, 42, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.report-control-sidebar input:focus, 
+.report-control-sidebar select:focus, 
+.report-control-sidebar textarea:focus {
+    border-color: #6366f1 !important;
+    background: rgba(15, 23, 42, 0.4) !important;
+}
+
+.report-control-sidebar textarea {
+    min-height: 55px !important;
+}
+
+/* 側邊欄精美自訂滾動條 */
+.report-control-sidebar::-webkit-scrollbar {
+    width: 6px !important;
+}
+.report-control-sidebar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.3) !important;
+    border-radius: 3px !important;
+}
+.report-control-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.5) !important; /* 顯眼的高質感紫色滑塊，便於用戶識別與拉動 */
+    border-radius: 3px !important;
+}
+.report-control-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.8) !important;
+}
+
+/* 4. 新增憑證迷你卡片輕量化 */
+#travelCostAdderCard {
+    background: rgba(30, 41, 59, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 14px !important;
+}
+
+#travelCostAdderCard .card-header h3 {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+}
+
+#travelCostAdderCard input, 
+#travelCostAdderCard select {
+    padding: 7px 10px !important;
+    font-size: 0.82rem !important;
+}
+
+#travelExpenseForm {
+    gap: 10px !important;
+}
+
+/* 5. 白色單張報告表預覽質感升級 */
+.report-preview-container {
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 2px 6px rgba(0,0,0,0.05) !important;
+    padding: 24px !important;
+    border-radius: var(--radius-lg) !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#printableReportArea {
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.03) !important;
+    border: 1px solid rgba(15, 23, 42, 0.05) !important;
+    border-radius: 6px !important;
+    transition: all 0.3s ease !important;
+}
+
+#printableReportArea:hover {
+    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.1), 0 4px 8px rgba(15, 23, 42, 0.05) !important;
+}
+
+/* ==========================================================================
+   出差旅費三欄式佈局與預覽縮小
+   ========================================================================== */
+
+/* 1. 兩欄式主要容器（左欄設定+新增，中欄預覽+清單） */
+.report-workspace-three-col {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 20px;
+    align-items: start;
+    width: 100%;
+    min-width: 760px; /* 防止壓縮，視窗縮小時由父層 .main-content 提供水平滾動 */
+}
+
+/* 2. 左欄與右欄的 Sticky 固定與各自內部滾動 */
+.report-col-left,
+.report-col-right {
+    position: sticky !important;
+    top: 15px !important;
+    height: auto !important;        /* 依內容自然展開，不截斷任何輸入欄位 */
+    max-height: none !important;    /* 移除高度限制 */
+    overflow-y: visible !important; /* 不需卡片內部滾動，讓頁面本身滾動 */
+    background: rgba(30, 41, 59, 0.35) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 16px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 10 !important;
+}
+
+/* 移除內部 card 的重複邊框與背景，使其完美融入磨砂玻璃 */
+.report-col-left .detail-card,
+.report-col-right .detail-card {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* 左欄與右欄精美滾動條 */
+.report-col-left::-webkit-scrollbar,
+.report-col-right::-webkit-scrollbar {
+    width: 6px !important;
+}
+.report-col-left::-webkit-scrollbar-track,
+.report-col-right::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.3) !important;
+    border-radius: 3px !important;
+}
+.report-col-left::-webkit-scrollbar-thumb,
+.report-col-right::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.5) !important;
+    border-radius: 3px !important;
+}
+.report-col-left::-webkit-scrollbar-thumb:hover,
+.report-col-right::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.8) !important;
+}
+
+/* 3. 中欄預覽容器與圖表縮小 */
+.report-col-middle {
+    display: flex !important;
+    flex-direction: column !important; /* 垂直排列：預覽圖在上，已儲存清單在下 */
+    align-items: center !important;
+    gap: 20px !important;
+    width: 100% !important;
+}
+
+/* 中欄內的已儲存清單滿版展開 */
+.report-col-middle .report-row-bottom {
+    width: 100% !important;
+    margin-top: 0 !important;
+}
+
+.report-col-middle .report-preview-container {
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.05) !important;
+    padding: 0 !important;
+    border-radius: var(--radius-lg) !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100% !important;  /* 隨中欄寬度自適應 */
+    overflow: hidden !important;
+    margin: 0 auto !important;
+}
+
+/* 在中欄網頁預覽時，A4 預覽圖表固定寬度，縮放比例由 JS 動態計算 */
+.report-col-middle #printableReportArea {
+    transform-origin: top center !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15) !important;
+    width: 1000px !important; /* 固定原始寬度，JS 會根據容器寬度設定縮放比例 */
+    height: auto !important;
+    min-height: 510px !important;
+    max-height: none !important;
+    padding: 20px 36px !important;
+}
+
+
+
+/* 4. 底欄歷史清單滿版 */
+.report-row-bottom {
+    width: 100% !important;
+    margin-top: 24px !important;
+}
+
+/* 5. 在列印時強制還原預覽圖的縮放與高度，不影響列印結果 */
+@media print {
+    .report-col-middle {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .report-col-middle #printableReportArea {
+        transform: none !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        padding: 0 !important;
+    }
+    
+    .report-col-middle .report-preview-container {
+        background: none !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        display: block !important;
+        height: auto !important;
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+}
+
+
+

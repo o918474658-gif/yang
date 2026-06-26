@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>發票與出差旅費整理統計工具</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <i data-lucide="receipt" class="logo-icon"></i>
+                <h2>發票旅費助手</h2>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>儀表板</span>
+                </button>
+                <button class="nav-item" data-tab="invoice-list">
+                    <i data-lucide="list-collapse"></i>
+                    <span>發票明細管理</span>
+                </button>
+                <button class="nav-item" data-tab="travel-report">
+                    <i data-lucide="file-spreadsheet"></i>
+                    <span>出差旅費報告表</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn-api-settings" id="openSettingsBtn" style="margin-bottom: 8px; width: 100%;">
+                    <i data-lucide="settings"></i>
+                    <span>API 金鑰設定</span>
+                </button>
+                <button class="btn-api-settings btn-logout-sidebar" id="logoutBtn" style="width: 100%;">
+                    <i data-lucide="log-out"></i>
+                    <span>安全登出</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-title">
+                    <h1 id="pageTitle">儀表板</h1>
+                    <p id="pageSubtitle">歡迎使用！在這裡查看您的發票整理進度與統計資訊。</p>
+                </div>
+                <div class="header-actions">
+                    <div class="month-selector-wrapper">
+                        <i data-lucide="calendar"></i>
+                        <input type="month" id="globalMonthFilter" class="input-month">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tab 1: Dashboard -->
+            <section class="tab-content active" id="tab-dashboard">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card inward">
+                        <div class="stat-icon">
+                            <i data-lucide="arrow-down-left"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">本月收到發票 (進項)</span>
+                            <span class="stat-value" id="statInwardAmount">$0</span>
+                            <span class="stat-subtext" id="statInwardCount">0 張發票</span>
+                        </div>
+                    </div>
+                    <div class="stat-card outward">
+                        <div class="stat-icon">
+                            <i data-lucide="arrow-up-right"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">本月開出發票 (銷項)</span>
+                            <span class="stat-value" id="statOutwardAmount">$0</span>
+                            <span class="stat-subtext" id="statOutwardCount">0 張發票</span>
+                        </div>
+                    </div>
+                    <div class="stat-card travel">
+                        <div class="stat-icon">
+                            <i data-lucide="train"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">本月出差交通費</span>
+                            <span class="stat-value" id="statTravelAmount">$0</span>
+                            <span class="stat-subtext" id="statTravelCount">0 筆憑證</span>
+                        </div>
+                    </div>
+                    <div class="stat-card total">
+                        <div class="stat-icon">
+                            <i data-lucide="wallet"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">本月報銷總金額</span>
+                            <span class="stat-value" id="statTotalReimburse">$0</span>
+                            <span class="stat-subtext" id="statTotalCount">共 0 筆明細</span>
+                        </div>
+                    </div>
+                    <div class="stat-card tax">
+                        <div class="stat-icon">
+                            <i data-lucide="percent"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">預估應納營業稅</span>
+                            <span class="stat-value" id="statTaxAmount">$0</span>
+                            <span class="stat-subtext" id="statTaxFormula">銷項稅: $0 - 進項稅: $0 (5%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Details Grid -->
+                <div class="dashboard-details-grid">
+                    <!-- Quick OCR Panel -->
+                    <div class="detail-card ocr-quick-start">
+                        <div class="card-header">
+                            <h3><i data-lucide="scan-line"></i> 快速 AI 發票辨識</h3>
+                            <span class="badge ai-badge">Gemini AI</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="dropzone" id="quickDropzone">
+                                <input type="file" id="quickFileInput" accept="image/*" class="file-input-hidden">
+                                <i data-lucide="cloud-lightning" class="dropzone-icon"></i>
+                                <p>將發票或車票照片拖曳至此，或 <span>點擊上傳</span></p>
+                                <span class="dropzone-sub">支援 JPG, PNG 格式</span>
+                            </div>
+                            <div class="camera-action">
+                                <button class="btn btn-secondary w-full" id="quickCameraBtn">
+                                    <i data-lucide="camera"></i> 開啟相機拍照
+                                </button>
+                            </div>
+                            <div class="api-warning-banner" id="apiWarningBanner">
+                                <i data-lucide="alert-triangle"></i>
+                                <span>尚未設定 Gemini API Key，請先於左下角進行設定以啟用 AI 辨識。</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="detail-card recent-list-card">
+                        <div class="card-header">
+                            <h3><i data-lucide="clock"></i> 最近新增明細</h3>
+                            <button class="btn btn-link" id="viewAllInvoicesBtn">查看全部</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="recent-list" id="recentInvoicesList">
+                                <!-- JavaScript will generate items here -->
+                                <div class="empty-state">
+                                    <i data-lucide="inbox"></i>
+                                    <p>本月尚無明細資料</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 2: Invoice List -->
+            <section class="tab-content" id="tab-invoice-list">
+                <div class="invoice-workspace">
+                    <!-- Left: Form & OCR Panel -->
+                    <div class="workspace-sidebar">
+                        <div class="detail-card">
+                            <div class="card-header">
+                                <h3 id="formTitle">新增發票 / 憑證</h3>
+                                <button class="btn btn-icon-only" id="resetFormBtn" title="清空表單">
+                                    <i data-lucide="rotate-ccw"></i>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <!-- Upload & Preview for OCR -->
+                                <div class="ocr-section-box">
+                                    <div class="mini-dropzone" id="listDropzone">
+                                        <input type="file" id="listFileInput" accept="image/*" class="file-input-hidden">
+                                        <i data-lucide="image" class="mini-dropzone-icon"></i>
+                                        <p>上傳照片進行 AI 辨識</p>
+                                    </div>
+                                    <div class="preview-container hidden" id="imagePreviewContainer">
+                                        <img id="imagePreview" src="" alt="發票預覽">
+                                        <button type="button" class="btn-remove-preview" id="removePreviewBtn" title="移除圖片">&times;</button>
+                                        <div class="ocr-progress-overlay hidden" id="ocrLoader">
+                                            <div class="spinner"></div>
+                                            <span id="ocrStatusText">AI 辨識中...</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary w-full hidden" id="btnTriggerOcr">
+                                        <i data-lucide="sparkles"></i> 執行 AI 辨識
+                                    </button>
+                                </div>
+
+                                <!-- Invoice Form -->
+                                <form id="invoiceForm" class="invoice-form">
+                                    <input type="hidden" id="editInvoiceId">
+                                    
+                                    <div class="form-group">
+                                        <label for="invDate">日期 <span class="required">*</span></label>
+                                        <input type="date" id="invDate" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="invType">類型 <span class="required">*</span></label>
+                                        <select id="invType" required>
+                                            <option value="進項">收到的發票 (進項)</option>
+                                            <option value="銷項">開出去的發票 (銷項)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="invNumber">發票 / 憑證號碼</label>
+                                        <input type="text" id="invNumber" placeholder="例如：AB-12345678">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="invDetail">品名 / 事由 <span class="required">*</span></label>
+                                        <input type="text" id="invDetail" placeholder="例如：加油、文具、辦公用品" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="invAmount">總金額 (NTD) <span class="required">*</span></label>
+                                        <input type="number" id="invAmount" min="0" placeholder="請輸入整數金額" required>
+                                    </div>
+
+                                    <div class="form-actions-row">
+                                        <button type="submit" class="btn btn-success flex-1" id="saveInvoiceBtn">
+                                            <i data-lucide="check"></i> 儲存明細
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Main Table & Filter -->
+                    <div class="workspace-main">
+                        <div class="detail-card h-full">
+                            <div class="card-header">
+                                <div class="table-title-area">
+                                    <h3><i data-lucide="table"></i> 當月明細清單</h3>
+                                    <span class="count-badge" id="listTotalCount">0 筆</span>
+                                </div>
+                                <div class="table-actions">
+                                    <select id="filterType" class="input-select">
+                                        <option value="all">所有類型</option>
+                                        <option value="進項">收到的發票 (進項)</option>
+                                        <option value="銷項">開出去的發票 (銷項)</option>
+                                        <option value="交通費">交通憑證</option>
+                                        <option value="住宿費">住宿費</option>
+                                        <option value="膳費">膳費</option>
+                                        <option value="其他">其他</option>
+                                    </select>
+                                    <button class="btn btn-secondary" id="exportCsvBtn">
+                                        <i data-lucide="download"></i> 匯出 CSV
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-0 overflow-auto">
+                                <table class="data-table" id="invoiceTable">
+                                    <thead>
+                                        <tr>
+                                            <th>日期</th>
+                                            <th>類型</th>
+                                            <th>發票號碼</th>
+                                            <th>品名/事由</th>
+                                            <th>交通細節</th>
+                                            <th class="text-right">金額</th>
+                                            <th class="text-center">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="invoiceTableBody">
+                                        <!-- JS will dynamically insert rows -->
+                                    </tbody>
+                                </table>
+                                <div class="empty-state p-8 hidden" id="tableEmptyState">
+                                    <i data-lucide="folder-open"></i>
+                                    <p>沒有符合篩選條件的明細</p>
+                                </div>
+                            </div>
+                            <div class="table-footer">
+                                <span>選擇月份總額：<strong id="tableFilteredTotal">$0</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 3: Travel Expense Report -->
+            <section class="tab-content" id="tab-travel-report">
+                <!-- 三欄式 Workspace -->
+                <div class="report-workspace-three-col">
+                    
+                    <!-- Column 1: 左側 - 報告表參數設定 -->
+                    <div class="report-col-left">
+                        <div class="detail-card">
+                            <div class="card-header">
+                                <h3><i data-lucide="sliders"></i> 報告表參數設定</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="repReportDate">填表日期</label>
+                                    <input type="date" id="repReportDate">
+                                </div>
+                                <div class="form-group">
+                                    <label for="repYear">申報年度 (民國)</label>
+                                    <input type="number" id="repYear" min="1" placeholder="例如：115">
+                                </div>
+                                <div class="form-group">
+                                    <label for="repMonth">申報月份</label>
+                                    <input type="number" id="repMonth" min="1" max="12" placeholder="例如：6">
+                                </div>
+                                <div class="form-group">
+                                    <label for="repDateRangeStart">出差日期 (自)</label>
+                                    <input type="date" id="repDateRangeStart">
+                                </div>
+                                <div class="form-group">
+                                    <label for="repDateRangeEnd">出差日期 (至)</label>
+                                    <input type="date" id="repDateRangeEnd">
+                                </div>
+                                <div class="form-group">
+                                    <label for="repPurpose">出差事由</label>
+                                    <input type="text" id="repPurpose" placeholder="例如：拜訪中南部客戶及市場調研" value="團體健身教課">
+                                </div>
+                                <div class="form-group">
+                                    <label for="repLocation">出差地點</label>
+                                    <input type="text" id="repLocation" placeholder="例如：台北、左營" value="台北">
+                                </div>
+                                <!-- 出差人隱藏欄位，固定為登入者名稱 -->
+                                <input type="hidden" id="repEmployee" value="林殦杉">
+                                <div class="form-group">
+                                    <label>車費金額 (自動帶入明細，亦可手動微調)</label>
+                                    <div class="form-row">
+                                        <div class="form-group col-4">
+                                            <label for="repTrainCostInput">火車</label>
+                                            <input type="number" id="repTrainCostInput" min="0" placeholder="0">
+                                        </div>
+                                        <div class="form-group col-4">
+                                            <label for="repCarCostInput">汽車</label>
+                                            <input type="number" id="repCarCostInput" min="0" placeholder="0">
+                                        </div>
+                                        <div class="form-group col-4">
+                                            <label for="repOtherCostInput">其他</label>
+                                            <input type="number" id="repOtherCostInput" min="0" placeholder="0">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-6">
+                                        <label for="repMealDays">膳費天數</label>
+                                        <input type="number" id="repMealDays" min="0" placeholder="天數">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label for="repMealRate">日支金額</label>
+                                        <input type="number" id="repMealRate" min="0" placeholder="單價">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-6">
+                                        <label for="repStayDays">住宿天數</label>
+                                        <input type="number" id="repStayDays" min="0" placeholder="天數">
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label for="repStayRate">日支金額</label>
+                                        <input type="number" id="repStayRate" min="0" placeholder="單價">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="repMemo">附記</label>
+                                    <textarea id="repMemo" placeholder="例如：檢附高鐵來回票根。"></textarea>
+                                </div>
+
+                                <button type="button" class="btn btn-success w-full" id="btnSaveReport" style="margin-bottom: 16px;">
+                                    <i data-lucide="save"></i> 儲存此報告表
+                                </button>
+
+                                <!-- 分隔線：新增差旅憑證區塊 -->
+                                <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0 14px; padding-top: 14px;">
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                        <i data-lucide="plus-circle" style="width:15px;height:15px;"></i> 新增差旅憑證
+                                    </p>
+                                    <form id="travelExpenseForm" class="invoice-form">
+                                        <div class="form-group">
+                                            <label for="travelDate">日期 <span class="required">*</span></label>
+                                            <input type="date" id="travelDate" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="travelType">憑證類型 <span class="required">*</span></label>
+                                            <select id="travelType" required>
+                                                <option value="交通費">交通憑證 (火車/高鐵/客運)</option>
+                                                <option value="住宿費">住宿費</option>
+                                                <option value="膳費">膳費 (餐費)</option>
+                                                <option value="其他">其他收據/什費</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="travelDetail">品名 / 事由 <span class="required">*</span></label>
+                                            <input type="text" id="travelDetail" placeholder="例如：台北到左營高鐵票、晒餐" required>
+                                        </div>
+                                        <div class="transport-fields" id="travelTransFields">
+                                            <div class="form-row">
+                                                <div class="form-group col-6">
+                                                    <label for="travelTransType">交通工具</label>
+                                                    <select id="travelTransType">
+                                                        <option value="火車">火車 (台鐵/捷運)</option>
+                                                        <option value="汽車">汽車 (客運/計程車)</option>
+                                                        <option value="其他">其他 (高鐵/飛機)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-6">
+                                                    <label for="travelLocation">地點</label>
+                                                    <input type="text" id="travelLocation" placeholder="例如：台北" value="台北">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="travelAmount">總金額 (NTD) <span class="required">*</span></label>
+                                            <input type="number" id="travelAmount" min="0" placeholder="請輸入金額" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-full" id="btnAddTravelExpense">
+                                            <i data-lucide="plus"></i> 新增明細
+                                        </button>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: 中間 - 報告表預覽 -->
+                    <div class="report-col-middle">
+                        <div class="report-preview-container" style="width: 100%;">
+                            <div class="paper-page" id="printableReportArea">
+                                <!-- Report Title -->
+                                <div class="report-title-section">
+                                    <div class="double-underline-container">
+                                <h1 class="report-main-title" id="reportMainTitle">出差旅費報告表</h1>
+                                    </div>
+                                    <div class="report-date-row">
+                                        民國 <span class="fill-line user-fill" style="width: 40px;" id="lblYear"></span> 年 
+                                        <span class="fill-line user-fill" style="width: 30px;" id="lblMonth"></span> 月 
+                                        <span class="fill-line user-fill" style="width: 30px;" id="lblDay"></span> 日
+                                    </div>
+                                </div>
+
+                                <!-- Main Table Layout -->
+                                <table class="report-grid-table">
+                                    <tbody>
+                                        <tr>
+                                            <td class="col-purpose-label text-center font-bold" style="width: 6%;">事<br>由</td>
+                                            <td class="col-purpose-val user-fill" id="lblPurpose" style="width: 44%; vertical-align: top; padding: 8px;"></td>
+                                            <td class="col-summary-label text-center font-bold" colspan="2" style="width: 30%;">摘&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;要</td>
+                                            <td class="col-amount-label text-center font-bold" style="width: 20%;">金&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;額</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-route-label text-center font-bold" rowspan="3">旅<br>程</td>
+                                            <td class="col-route-val user-fill" rowspan="3" id="lblRouteLocation" style="vertical-align: middle; padding: 12px; font-size: 24px; font-weight: bold; letter-spacing: 2px;">
+                                                台北
+                                            </td>
+                                            <td class="sub-summary-label text-center" rowspan="3" style="width: 8%;">車<br><br>費</td>
+                                            <td class="item-label" style="width: 22%;">火車車費</td>
+                                            <td class="item-amount text-right user-fill" id="lblTrainCost"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="item-label">汽車車費</td>
+                                            <td class="item-amount text-right user-fill" id="lblCarCost"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="item-label">其&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;他</td>
+                                            <td class="item-amount text-right user-fill" id="lblOtherTransportCost"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-date-label text-center font-bold">日<br>期</td>
+                                            <td class="col-date-val" style="padding: 8px;">
+                                                自民國 <span id="lblStartYear" class="user-fill"></span> 年 <span id="lblStartMonth" class="user-fill"></span> 月 <span id="lblStartDay" class="user-fill"></span> 日 起<br>
+                                                至民國 <span id="lblEndYear" class="user-fill"></span> 年 <span id="lblEndMonth" class="user-fill"></span> 月 <span id="lblEndDay" class="user-fill"></span> 日 止
+                                            </td>
+                                            <td class="item-label text-center font-bold" colspan="2">
+                                                膳費 (<span id="lblMealDays" class="user-fill"></span>人 <span id="lblMealDaysCount" class="user-fill"></span>天)
+                                            </td>
+                                            <td class="item-amount text-right user-fill" id="lblMealCost"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-memo-label text-center font-bold" rowspan="3">附<br><br>記</td>
+                                            <td class="col-memo-val user-fill" id="lblMemo" rowspan="3" style="vertical-align: top; padding: 8px; font-size: 11px; line-height: 1.5;"></td>
+                                            <td class="item-label text-center font-bold" colspan="2">
+                                                宿費 (<span id="lblStayDays" class="user-fill"></span>人 <span id="lblStayDaysCount" class="user-fill"></span>天)
+                                            </td>
+                                            <td class="item-amount text-right user-fill" id="lblStayCost"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="item-label text-center font-bold" colspan="2" style="height: 28px;">什費</td>
+                                            <td class="item-amount text-right user-fill" id="lblMiscCost"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="item-label text-center font-bold" colspan="2" style="height: 28px;"></td>
+                                            <td class="item-amount text-right"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-total-label text-center font-bold" colspan="2" style="height: 32px;">合&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;計</td>
+                                            <td class="col-total-label text-center font-bold" colspan="2"></td>
+                                            <td class="item-amount text-right font-bold user-fill" id="lblTotalCost" style="font-size: 14px;"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <!-- Sign Off Area -->
+                                <div class="sign-off-area">
+                                    <div class="sign-column"><span class="sign-title">核准</span><span class="sign-value"></span></div>
+                                    <div class="sign-column"><span class="sign-title">會計</span><span class="sign-value"></span></div>
+                                    <div class="sign-column"><span class="sign-title">覆核</span><span class="sign-value"></span></div>
+                                    <div class="sign-column"><span class="sign-title">出納</span><span class="sign-value"></span></div>
+                                    <div class="sign-column"><span class="sign-title">登帳</span><span class="sign-value"></span></div>
+                                    <div class="sign-column"><span class="sign-title">出差人</span><span class="sign-value user-fill" id="lblEmployeeSign"></span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 已儲存之出差旅費報告表 (圖表正下方) -->
+                        <div class="report-row-bottom">
+                            <div class="detail-card reports-list-card" id="savedReportsCard">
+                                <div class="card-header">
+                                    <h3><i data-lucide="archive"></i> 已儲存之出差旅費報告表</h3>
+                                    <button class="btn btn-secondary btn-sm" id="btnBatchPrintReports">
+                                        <i data-lucide="printer"></i> 合併列印所選 (A4 一頁 3 張)
+                                    </button>
+                                </div>
+                                <div class="card-body p-0 overflow-auto">
+                                    <table class="data-table" id="savedReportsTable">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 40px; text-align: center;"><input type="checkbox" id="chkSelectAllReports"></th>
+                                                <th>日期區間</th>
+                                                <th>事由</th>
+                                                <th>地點</th>
+                                                <th>出差人</th>
+                                                <th class="text-right">總金額</th>
+                                                <th class="text-center">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="savedReportsTableBody">
+                                            <!-- JS 會動態插入已儲存報告表列表 -->
+                                        </tbody>
+                                    </table>
+                                    <div class="empty-state p-6" id="reportsEmptyState">
+                                        <i data-lucide="folder-open"></i>
+                                        <p>目前尚無已儲存的報告表</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- /.report-row-bottom -->
+                    </div><!-- /.report-col-middle -->
+
+
+                </div>
+
+            </section>
+            </section>
+        </main>
+    </div>
+
+    <!-- API Key Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i data-lucide="key-round"></i> Gemini API 金鑰設定</h3>
+                <button class="btn-close-modal" id="closeSettingsBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-intro">本工具完全在您的瀏覽器本地運行。您的 API 金鑰將儲存在本機的 <code>localStorage</code> 中，直接發送請求至 Google Gemini API，絕不會上傳到任何第三方伺服器。</p>
+                
+                <p class="server-key-status" id="serverKeyStatus" style="display: none; margin-bottom: 15px; padding: 10px 12px; background-color: rgba(16, 185, 129, 0.1); border: 1px solid var(--color-success, #10b981); border-radius: var(--border-radius-md, 6px); color: var(--color-success, #10b981); font-size: var(--font-size-sm, 14px);">
+                    <i data-lucide="check-circle" style="display:inline-block; width:16px; height:16px; vertical-align:middle; margin-right:6px;"></i>
+                    後端已啟用 <code>GEMINI_API_KEY</code> 環境變數，若無特殊需求，您無需在此處設定金鑰。
+                </p>
+                
+                <div class="form-group">
+                    <label for="apiKeyInput">Gemini API Key</label>
+                    <div class="api-key-input-wrapper">
+                        <input type="password" id="apiKeyInput" placeholder="請輸入 AI Studio 申請的 API 金鑰 (AIzaSy...)">
+                        <button type="button" class="btn-toggle-visibility" id="toggleApiKeyVisibility" title="顯示/隱藏">
+                            <i data-lucide="eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="apiModelSelect">預設辨識模型</label>
+                    <select id="apiModelSelect">
+                        <option value="gemini-3.5-flash">Gemini 3.5 Flash (推薦：最新世代、辨識速度極快)</option>
+                    </select>
+                </div>
+
+                <div class="guide-box">
+                    <h4>💡 如何取得免費的 API 金鑰？</h4>
+                    <ol>
+                        <li>前往 <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">Google AI Studio <i data-lucide="external-link" style="display:inline-block;width:12px;height:12px;vertical-align:middle;"></i></a>。</li>
+                        <li>登入您的 Google 帳號。</li>
+                        <li>點擊左上角的 <strong>"Get API key"</strong>。</li>
+                        <li>點擊 <strong>"Create API key"</strong>，選擇一個專案或新建專案，複製產生的金鑰。</li>
+                        <li>將金鑰貼到上方的輸入框中，並點擊儲存。</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelSettingsBtn">取消</button>
+                <button class="btn btn-success" id="saveSettingsBtn">儲存金鑰</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Camera Modal -->
+    <div class="modal-overlay" id="cameraModal">
+        <div class="modal-card modal-camera-card">
+            <div class="modal-header">
+                <h3><i data-lucide="camera"></i> 拍攝發票 / 憑證</h3>
+                <button class="btn-close-modal" id="closeCameraBtn">&times;</button>
+            </div>
+            <div class="modal-body p-0 relative">
+                <video id="cameraVideo" autoplay playsinline class="camera-video-stream"></video>
+                <canvas id="cameraCanvas" class="hidden"></canvas>
+                <div class="camera-guideline-overlay">
+                    <div class="guideline-box">請將發票或票根置於此框內</div>
+                </div>
+            </div>
+            <div class="modal-footer justify-center">
+                <button class="btn btn-secondary" id="cancelCameraBtn">取消</button>
+                <button class="btn btn-danger btn-capture" id="captureBtn">
+                    <i data-lucide="circle-dot"></i> 拍照
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隱藏的合併列印專用 batch 容器 -->
+    <div id="batchPrintContainer" class="print-only"></div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

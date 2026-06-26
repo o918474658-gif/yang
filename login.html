@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入 - 發票旅費助手</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            --card-bg: rgba(30, 41, 59, 0.45);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --glass-blur: blur(20px);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-light: rgba(99, 102, 241, 0.15);
+            --danger: #ef4444;
+            --danger-light: rgba(239, 68, 68, 0.15);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(15, 23, 42, 0.5);
+            --font-sans: 'Inter', 'Noto Sans TC', sans-serif;
+            --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: #090d16;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            overflow: hidden;
+        }
+
+        /* Background Light Blobs for rich aesthetic depth */
+        .blob {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: var(--primary);
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: 0;
+            animation: float 8s infinite alternate ease-in-out;
+        }
+
+        .blob-1 {
+            top: 20%;
+            left: 20%;
+        }
+
+        .blob-2 {
+            bottom: 20%;
+            right: 20%;
+            background: #a855f7;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-40px) scale(1.15); }
+        }
+
+        /* Glassmorphism Card Container */
+        .login-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            width: 420px;
+            max-width: 90%;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 1;
+            transition: var(--transition);
+        }
+
+        .login-card.shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            color: var(--primary);
+            filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.6));
+        }
+
+        .logo-area h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(120deg, #fff, var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-top: 4px;
+        }
+
+        .logo-area p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            width: 18px;
+            height: 18px;
+            transition: var(--transition);
+        }
+
+        .form-group input {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px 14px 12px 42px;
+            font-size: 0.95rem;
+            font-family: var(--font-sans);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            outline: none;
+            width: 100%;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .form-group input:focus + i {
+            color: var(--primary);
+        }
+
+        /* Button style */
+        .btn-login {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2), var(--shadow-glow);
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            transition: var(--transition);
+            font-family: var(--font-sans);
+        }
+
+        .btn-login:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        /* Error Box */
+        .error-banner {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--danger-light);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: var(--radius-md);
+            color: #f87171;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            display: none; /* Default hidden */
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error-banner i {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        /* Eye toggle visibility style */
+        .btn-toggle-pwd {
+            position: absolute;
+            right: 14px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="login-card" id="loginCard">
+        <div class="logo-area">
+            <i data-lucide="receipt" class="logo-icon"></i>
+            <h2>發票旅費助手</h2>
+            <p>請登入以存取您的發票與出差報告表系統</p>
+        </div>
+
+        <div class="error-banner" id="errorBanner">
+            <i data-lucide="alert-circle"></i>
+            <span id="errorMsg">帳號或密碼錯誤！</span>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">帳號</label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" placeholder="請輸入帳號" required autocomplete="username">
+                    <i data-lucide="user"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">密碼</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" placeholder="請輸入密碼" required autocomplete="current-password">
+                    <i data-lucide="lock"></i>
+                    <button type="button" class="btn-toggle-pwd" id="togglePwd" title="顯示/隱藏">
+                        <i data-lucide="eye" style="position:static;"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login" id="submitBtn">
+                <i data-lucide="log-in"></i> 登入系統
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // 初始化 Lucide Icons
+        lucide.createIcons();
+
+        // 密碼顯示/隱藏切換
+        const togglePwdBtn = document.getElementById('togglePwd');
+        const passwordInput = document.getElementById('password');
+        
+        togglePwdBtn.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePwdBtn.innerHTML = '<i data-lucide="eye-off" style="position:static;"></i>';
+            } else {
+                passwordInput.type = 'password';
+                togglePwdBtn.innerHTML = '<i data-lucide="eye" style="position:static;"></i>';
+            }
+            lucide.createIcons();
+        });
+
+        // 處理登入表單提交
+        const loginForm = document.getElementById('loginForm');
+        const loginCard = document.getElementById('loginCard');
+        const errorBanner = document.getElementById('errorBanner');
+        const errorMsg = document.getElementById('errorMsg');
+        const submitBtn = document.getElementById('submitBtn');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = passwordInput.value;
+
+            // 停用按鈕防重複提交
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '驗證中...';
+            errorBanner.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    submitBtn.innerHTML = '登入成功，跳轉中...';
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 500);
+                } else {
+                    throw new Error(data.message || '登入失敗');
+                }
+            } catch (err) {
+                // 顯示錯誤警示並執行搖晃動畫
+                errorMsg.innerText = err.message;
+                errorBanner.style.display = 'flex';
+                
+                loginCard.classList.add('shake');
+                setTimeout(() => {
+                    loginCard.classList.remove('shake');
+                }, 400);
+
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i data-lucide="log-in"></i> 登入系統';
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
