@@ -1623,7 +1623,8 @@ body {
     }
     
     .batch-report-item {
-        width: 100%;
+        width: 620px !important; /* 1000px * 0.62 = 620px 物理寬度，防止 1000px 溢出 parent */
+        margin: 0 auto !important; /* 使合併列印的報表在 A4 直向紙張上完美水平置中 */
         height: 360px; /* 3張大約高度，能在一張 A4 直向完美塞入 */
         overflow: hidden;
         position: relative;
@@ -1638,8 +1639,8 @@ body {
         max-height: 560px !important;
         overflow: hidden !important;
         transform: scale(0.62) !important;
-        transform-origin: top center;
-        margin: 0 auto !important;
+        transform-origin: top left !important; /* 改為從左上角開始縮放，完美填滿並貼合父容器 */
+        margin: 0 !important;
         box-shadow: none !important;
         border: none !important;
         padding: 5px !important;
