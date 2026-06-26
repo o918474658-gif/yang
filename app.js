@@ -780,7 +780,16 @@ function setupDragAndDrop(zoneId, inputId, onFileCallback) {
     const zone = document.getElementById(zoneId);
     const input = document.getElementById(inputId);
 
-    zone.addEventListener('click', () => input.click());
+    zone.addEventListener('click', (e) => {
+        if (e.target !== input) {
+            input.click();
+        }
+    });
+
+    // 阻止 input 本身被點擊時事件冒泡到 zone，避免二次觸發
+    input.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
     
     zone.addEventListener('dragover', (e) => {
         e.preventDefault();
