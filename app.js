@@ -174,13 +174,30 @@ function saveInvoicesToStorage() {
     localStorage.setItem('invoice_helper_items', JSON.stringify(state.invoices));
 }
 
+function autoSwitchToMonth(dateStr) {
+    if (!dateStr) return;
+    const match = dateStr.match(/^(\d{4}-\d{2})/);
+    if (match) {
+        const itemMonth = match[1];
+        if (state.currentMonth !== itemMonth) {
+            state.currentMonth = itemMonth;
+            const filterEl = document.getElementById('globalMonthFilter');
+            if (filterEl) {
+                filterEl.value = itemMonth;
+            }
+        }
+    }
+}
+
 function addInvoice(item) {
+    autoSwitchToMonth(item.date);
     state.invoices.push(item);
     saveInvoicesToStorage();
     refreshAllViews();
 }
 
 function updateInvoice(id, updatedItem) {
+    autoSwitchToMonth(updatedItem.date);
     const index = state.invoices.findIndex(item => item.id === id);
     if (index !== -1) {
         state.invoices[index] = { ...state.invoices[index], ...updatedItem };
