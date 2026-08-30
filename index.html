@@ -400,9 +400,19 @@
                                     <textarea id="repMemo" placeholder="例如：檢附高鐵來回票根。"></textarea>
                                 </div>
 
-                                <button type="button" class="btn btn-success w-full" id="btnSaveReport" style="margin-bottom: 16px;">
-                                    <i data-lucide="save"></i> 儲存此報告表
-                                </button>
+                                <div class="report-action-btn-group" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                                    <button type="button" class="btn btn-success w-full" id="btnSaveReport">
+                                        <i data-lucide="save"></i> 儲存此報告表
+                                    </button>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="button" class="btn btn-secondary flex-1" id="btnExportCurrentExcel" title="將當前預覽的報告表匯出為 Excel 工作表 (.xlsx)">
+                                            <i data-lucide="file-spreadsheet"></i> 匯出 Excel
+                                        </button>
+                                        <button type="button" class="btn btn-secondary flex-1" id="btnExportCurrentPdf" title="將當前預覽的報告表匯出為標準 PDF 文件 (.pdf)">
+                                            <i data-lucide="file-text"></i> 匯出 PDF
+                                        </button>
+                                    </div>
+                                </div>
 
                                 <!-- 分隔線：新增差旅憑證區塊 -->
                                 <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 16px 0 14px; padding-top: 14px;">
@@ -549,11 +559,19 @@
                         <!-- 已儲存之出差旅費報告表 (圖表正下方) -->
                         <div class="report-row-bottom">
                             <div class="detail-card reports-list-card" id="savedReportsCard">
-                                <div class="card-header">
+                                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                                     <h3><i data-lucide="archive"></i> 已儲存之出差旅費報告表</h3>
-                                    <button class="btn btn-secondary btn-sm" id="btnBatchPrintReports">
-                                        <i data-lucide="printer"></i> 合併列印所選 (A4 一頁 3 張)
-                                    </button>
+                                    <div class="batch-actions-group" style="display: flex; gap: 8px; align-items: center;">
+                                        <button class="btn btn-secondary btn-sm" id="btnBatchExportExcel" title="將勾選的報告表匯出為多個工作表或合併清單 Excel (.xlsx)">
+                                            <i data-lucide="file-spreadsheet"></i> 批次匯出 Excel
+                                        </button>
+                                        <button class="btn btn-secondary btn-sm" id="btnBatchExportPdf" title="將勾選的報告表合併匯出為標準 PDF 文件 (.pdf)">
+                                            <i data-lucide="file-text"></i> 批次匯出 PDF
+                                        </button>
+                                        <button class="btn btn-secondary btn-sm" id="btnBatchPrintReports" title="合併列印所選報告表 (A4 一頁 3 張)">
+                                            <i data-lucide="printer"></i> 合併列印所選
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="card-body p-0 overflow-auto">
                                     <table class="data-table" id="savedReportsTable">
@@ -664,6 +682,10 @@
 
     <!-- 隱藏的合併列印專用 batch 容器 -->
     <div id="batchPrintContainer" class="print-only"></div>
+
+    <!-- Third-party Libraries for Excel and PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <!-- Scripts -->
     <script src="app.js"></script>

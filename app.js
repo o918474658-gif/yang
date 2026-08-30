@@ -581,6 +581,26 @@ function initEventListeners() {
         });
     }
 
+    // 匯出當前預覽報告表 Excel / PDF
+    const exportCurrentExcelBtn = document.getElementById('btnExportCurrentExcel');
+    if (exportCurrentExcelBtn) {
+        exportCurrentExcelBtn.addEventListener('click', exportCurrentReportToExcel);
+    }
+    const exportCurrentPdfBtn = document.getElementById('btnExportCurrentPdf');
+    if (exportCurrentPdfBtn) {
+        exportCurrentPdfBtn.addEventListener('click', exportCurrentReportToPdf);
+    }
+
+    // 批次匯出 Excel / PDF
+    const batchExportExcelBtn = document.getElementById('btnBatchExportExcel');
+    if (batchExportExcelBtn) {
+        batchExportExcelBtn.addEventListener('click', handleBatchExportExcel);
+    }
+    const batchExportPdfBtn = document.getElementById('btnBatchExportPdf');
+    if (batchExportPdfBtn) {
+        batchExportPdfBtn.addEventListener('click', handleBatchExportPdf);
+    }
+
     // 安全登出按鈕
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
@@ -1808,6 +1828,12 @@ function renderReportsTable() {
                     <button class="btn-table-edit" onclick="loadReportDirect('${report.id}')" title="載入預覽/編輯">
                         <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
                     </button>
+                    <button class="btn-table-edit" onclick="exportDirectReportToExcel('${report.id}')" title="匯出 Excel 工作表 (.xlsx)">
+                        <i data-lucide="file-spreadsheet" style="width: 14px; height: 14px;"></i>
+                    </button>
+                    <button class="btn-table-edit" onclick="exportDirectReportToPdf('${report.id}')" title="匯出 PDF 文件 (.pdf)">
+                        <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
+                    </button>
                     <button class="btn-table-delete" onclick="deleteReportDirect('${report.id}')" title="刪除">
                         <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                     </button>
@@ -2146,3 +2172,321 @@ function handleLogout() {
         });
     }
 }
+
+// ==========================================================================
+// Excel (.xlsx) & PDF (.pdf) Export Functions
+// ==========================================================================
+
+// 取得當前左側面板與預覽區的報告表資料物件
+function getCurrentReportData() {
+    const repYear = document.getElementById('repYear').value;
+    const repMonth = document.getElementById('repMonth').value;
+    const repDateRangeStart = document.getElementById('repDateRangeStart').value;
+    const repDateRangeEnd = document.getElementById('repDateRangeEnd').value;
+    const repPurpose = document.getElementById('repPurpose').value;
+    const repEmployeeEl = document.getElementById('repEmployee');
+    const repEmployee = repEmployeeEl ? repEmployeeEl.value : '';
+    const repLocation = document.getElementById('repLocation').value || '台北';
+
+    const trainCost = parseInt(document.getElementById('repTrainCostInput').value || 0, 10);
+    const carCost = parseInt(document.getElementById('repCarCostInput').value || 0, 10);
+    const otherCost = parseInt(document.getElementById('repOtherCostInput').value || 0, 10);
+
+    const repMealDays = parseInt(document.getElementById('repMealDays').value || 0, 10);
+    const repMealRate = parseInt(document.getElementById('repMealRate').value || 0, 10);
+    const repStayDays = parseInt(document.getElementById('repStayDays').value || 0, 10);
+    const repStayRate = parseInt(document.getElementById('repStayRate').value || 0, 10);
+    const repMemo = document.getElementById('repMemo').value;
+
+    const miscCostText = document.getElementById('lblMiscCost').innerText || '0';
+    const miscCost = parseInt(miscCostText.replace(/,/g, ''), 10) || 0;
+    const grandTotal = trainCost + carCost + otherCost + (repMealDays * repMealRate) + (repStayDays * repStayRate) + miscCost;
+
+    return {
+        year: repYear,
+        month: repMonth,
+        dateRangeStart: repDateRangeStart,
+        dateRangeEnd: repDateRangeEnd,
+        purpose: repPurpose,
+        employee: repEmployee,
+        location: repLocation,
+        trainCost: trainCost,
+        carCost: carCost,
+        otherCost: otherCost,
+        mealDays: repMealDays,
+        mealRate: repMealRate,
+        stayDays: repStayDays,
+        stayRate: repStayRate,
+        miscCost: miscCost,
+        totalCost: grandTotal,
+        memo: repMemo,
+        dateCreated: document.getElementById('repReportDate').value 
+            ? new Date(document.getElementById('repReportDate').value).toISOString() 
+            : new Date().toISOString()
+    };
+}
+
+// 建立報告表專用 Excel Worksheet
+function createReportWorksheet(report) {
+    const d = new Date(report.dateCreated || Date.now());
+    const fillDateStr = `民國 ${d.getFullYear() - 1911} 年 ${d.getMonth() + 1} 月 ${d.getDate()} 日`;
+    const dateRangeStr = (report.dateRangeStart && report.dateRangeEnd)
+        ? `自 ${report.dateRangeStart} 起 至 ${report.dateRangeEnd} 止`
+        : `${report.year}年${report.month}月`;
+
+    const mealTotal = (report.mealDays || 0) * (report.mealRate || 0);
+    const stayTotal = (report.stayDays || 0) * (report.stayRate || 0);
+
+    const aoa = [
+        ["出差旅費報告表"],
+        ["填表日期：", fillDateStr, "", "出差人：", report.employee || ""],
+        ["出差事由：", report.purpose || "", "", "出差地點：", report.location || ""],
+        ["出差日期：", dateRangeStr, "", "申報期別：", `${report.year}年${report.month}月`],
+        [""],
+        ["項目分類", "子項目 / 說明", "天數/數量", "日支單價", "金額 (NTD)"],
+        ["車費", "火車車費 (台鐵/捷運)", "-", "-", report.trainCost || 0],
+        ["車費", "汽車車費 (客運/計程車)", "-", "-", report.carCost || 0],
+        ["車費", "其他交通費 (高鐵/機票)", "-", "-", report.otherCost || 0],
+        ["膳費", `膳食日支 (${report.mealDays || 0}人 ${report.mealDays || 0}天)`, report.mealDays || 0, report.mealRate || 0, mealTotal],
+        ["宿費", `住宿日支 (${report.stayDays || 0}人 ${report.stayDays || 0}天)`, report.stayDays || 0, report.stayRate || 0, stayTotal],
+        ["什費", "各項雜費/其他", "-", "-", report.miscCost || 0],
+        [""],
+        ["合計總金額", "", "", "", report.totalCost || 0],
+        ["附記 / 備註", report.memo || "無", "", "", ""],
+        [""],
+        ["核准", "會計", "覆核", "出納", "出差人 (簽章)"],
+        ["", "", "", "", report.employee || ""]
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [
+        { wch: 16 },
+        { wch: 34 },
+        { wch: 14 },
+        { wch: 14 },
+        { wch: 16 }
+    ];
+    return ws;
+}
+
+// 匯出當前預覽的報告表為 Excel (.xlsx)
+function exportCurrentReportToExcel() {
+    if (typeof XLSX === 'undefined') {
+        alert('Excel 匯出函式庫載入中，請稍候重試！');
+        return;
+    }
+    const report = getCurrentReportData();
+    const wb = XLSX.utils.book_new();
+    const ws = createReportWorksheet(report);
+    
+    const sheetName = `${report.month || '6'}月出差報告表`;
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    
+    const fileName = `出差旅費報告表_${report.employee || '林憶杰'}_${report.year}年${report.month}月.xlsx`;
+    XLSX.writeFile(wb, fileName);
+}
+
+// 匯出當前預覽的報告表為 PDF (.pdf)
+function exportCurrentReportToPdf() {
+    if (typeof html2pdf === 'undefined') {
+        alert('PDF 匯出函式庫載入中，請稍候重試！');
+        return;
+    }
+    const reportArea = document.getElementById('printableReportArea');
+    if (!reportArea) return;
+
+    const data = getCurrentReportData();
+    const fileName = `出差旅費報告表_${data.employee || '林憶杰'}_${data.year}年${data.month}月.pdf`;
+
+    const clone = reportArea.cloneNode(true);
+    clone.style.transform = 'none';
+    clone.style.margin = '0 auto';
+    clone.style.boxShadow = 'none';
+
+    const wrapper = document.createElement('div');
+    wrapper.style.padding = '15px';
+    wrapper.style.background = '#ffffff';
+    wrapper.appendChild(clone);
+
+    const opt = {
+        margin: [5, 5, 5, 5],
+        filename: fileName,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    };
+
+    html2pdf().set(opt).from(wrapper).save();
+}
+
+// 批次匯出勾選的報告表為 Excel (.xlsx)
+function handleBatchExportExcel() {
+    if (typeof XLSX === 'undefined') {
+        alert('Excel 匯出函式庫載入中，請稍候重試！');
+        return;
+    }
+    const tbody = document.getElementById('savedReportsTableBody');
+    if (!tbody) return;
+
+    const checkboxes = tbody.querySelectorAll('.report-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('請先勾選至少一張要匯出 Excel 的報告表！');
+        return;
+    }
+
+    const selectedIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+    const selectedReports = state.reports.filter(r => selectedIds.includes(r.id));
+    selectedReports.sort((a, b) => new Date(a.dateRangeStart) - new Date(b.dateRangeStart));
+
+    const wb = XLSX.utils.book_new();
+
+    // 彙整總清單 Summary Sheet
+    const summaryAoa = [
+        ["出差旅費報告表 - 批次匯出清單"],
+        ["序號", "出差人", "申報期別", "出差事由", "地點", "起訖區間", "車費合計", "膳宿什費", "總金額 (NTD)"]
+    ];
+
+    selectedReports.forEach((r, idx) => {
+        const transTotal = (r.trainCost || 0) + (r.carCost || 0) + (r.otherCost || 0);
+        const otherTotal = (r.totalCost || 0) - transTotal;
+        summaryAoa.push([
+            idx + 1,
+            r.employee || '',
+            `${r.year}年${r.month}月`,
+            r.purpose || '',
+            r.location || '',
+            `${r.dateRangeStart || ''} ~ ${r.dateRangeEnd || ''}`,
+            transTotal,
+            otherTotal,
+            r.totalCost || 0
+        ]);
+
+        // 為每一份報告表獨立建立一個 Sheet
+        const ws = createReportWorksheet(r);
+        const sheetTitle = `${idx + 1}_${r.month || ''}月_${r.location || '差旅'}`.slice(0, 30);
+        XLSX.utils.book_append_sheet(wb, ws, sheetTitle);
+    });
+
+    const summaryWs = XLSX.utils.aoa_to_sheet(summaryAoa);
+    summaryWs['!cols'] = [
+        { wch: 6 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 24 },
+        { wch: 12 },
+        { wch: 28 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 15 }
+    ];
+    // 將總覽放在第一個工作表
+    XLSX.utils.book_append_sheet(wb, summaryWs, "總覽彙整清單");
+    wb.SheetNames.unshift(wb.SheetNames.pop());
+
+    const fileName = `出差旅費報告表_批次匯出_${selectedReports.length}筆.xlsx`;
+    XLSX.writeFile(wb, fileName);
+}
+
+// 批次匯出勾選的報告表為 PDF (.pdf，A4 直向合併)
+function handleBatchExportPdf() {
+    if (typeof html2pdf === 'undefined') {
+        alert('PDF 匯出函式庫載入中，請稍候重試！');
+        return;
+    }
+    const tbody = document.getElementById('savedReportsTableBody');
+    if (!tbody) return;
+
+    const checkboxes = tbody.querySelectorAll('.report-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('請先勾選至少一張要匯出 PDF 的報告表！');
+        return;
+    }
+
+    const selectedIds = Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+    const selectedReports = state.reports.filter(r => selectedIds.includes(r.id));
+    selectedReports.sort((a, b) => new Date(a.dateRangeStart) - new Date(b.dateRangeStart));
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'batch-export-pdf-container';
+    wrapper.style.background = '#ffffff';
+    wrapper.style.padding = '0';
+
+    selectedReports.forEach((report, idx) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'batch-report-item';
+        itemDiv.style.width = '620px';
+        itemDiv.style.margin = '0 auto 15px';
+        itemDiv.style.pageBreakInside = 'avoid';
+        
+        const paperDiv = document.createElement('div');
+        paperDiv.className = 'paper-page';
+        paperDiv.style.transform = 'none';
+        paperDiv.style.boxShadow = 'none';
+        paperDiv.innerHTML = generateReportHtml(report);
+        
+        itemDiv.appendChild(paperDiv);
+        wrapper.appendChild(itemDiv);
+    });
+
+    const fileName = `出差旅費報告表_合併匯出_${selectedReports.length}筆.pdf`;
+    const opt = {
+        margin: [5, 5, 5, 5],
+        filename: fileName,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(wrapper).save();
+}
+
+// 表格單列直接匯出 Excel
+window.exportDirectReportToExcel = function(id) {
+    const report = state.reports.find(r => r.id === id);
+    if (!report) return;
+
+    if (typeof XLSX === 'undefined') {
+        alert('Excel 匯出函式庫載入中，請稍候重試！');
+        return;
+    }
+    const wb = XLSX.utils.book_new();
+    const ws = createReportWorksheet(report);
+    const sheetName = `${report.month || '6'}月報告表`;
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    
+    const fileName = `出差旅費報告表_${report.employee || '林憶杰'}_${report.year}年${report.month}月.xlsx`;
+    XLSX.writeFile(wb, fileName);
+};
+
+// 表格單列直接匯出 PDF
+window.exportDirectReportToPdf = function(id) {
+    const report = state.reports.find(r => r.id === id);
+    if (!report) return;
+
+    if (typeof html2pdf === 'undefined') {
+        alert('PDF 匯出函式庫載入中，請稍候重試！');
+        return;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.style.padding = '15px';
+    wrapper.style.background = '#ffffff';
+
+    const paperDiv = document.createElement('div');
+    paperDiv.className = 'paper-page';
+    paperDiv.style.transform = 'none';
+    paperDiv.style.boxShadow = 'none';
+    paperDiv.innerHTML = generateReportHtml(report);
+    wrapper.appendChild(paperDiv);
+
+    const fileName = `出差旅費報告表_${report.employee || '林憶杰'}_${report.year}年${report.month}月.pdf`;
+    const opt = {
+        margin: [5, 5, 5, 5],
+        filename: fileName,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+    };
+
+    html2pdf().set(opt).from(wrapper).save();
+};
