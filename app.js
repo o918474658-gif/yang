@@ -489,6 +489,8 @@ function updateDashboardStats() {
         if (item.type === '進項') {
             inwardTotal += item.amount;
             inwardCount++;
+            totalReimburse += item.amount;
+            totalCount++;
         } else if (item.type === '銷項') {
             outwardTotal += item.amount;
             outwardCount++;
@@ -506,9 +508,9 @@ function updateDashboardStats() {
 
     // 預估應納營業稅計算 (台灣營業稅率 5%，金額預設為含稅)
     // 銷項稅額 = 銷項總額 * 5 / 105
-    // 進項稅額 = (進項發票總額 + 所有差旅報銷支出) * 5 / 105
+    // 可扣抵進項稅額 = 本月總報銷支出 * 5 / 105 (包含進項發票與各項報銷憑證)
     const outwardTax = Math.round(outwardTotal * 5 / 105);
-    const inwardTax = Math.round((inwardTotal + totalReimburse) * 5 / 105);
+    const inwardTax = Math.round(totalReimburse * 5 / 105);
     const estimatedVat = outwardTax > inwardTax ? (outwardTax - inwardTax) : 0;
 
     document.getElementById('statInwardAmount').innerText = `$${inwardTotal.toLocaleString()}`;
