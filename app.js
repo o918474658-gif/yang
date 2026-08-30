@@ -333,8 +333,48 @@ function initEventListeners() {
     // When date range changes, automatically recalculate and fill in the transport costs
     document.getElementById('repDateRangeStart').addEventListener('change', () => updateTravelReportPreview(true));
     document.getElementById('repDateRangeEnd').addEventListener('change', () => updateTravelReportPreview(true));
-    // 填表日期變更時即時更新預覽
-    document.getElementById('repReportDate').addEventListener('change', () => updateTravelReportPreview(false));
+    // 填表日期變更時：自動切換申報年度、申報月份、出差日期起訖區間並重新統計預覽
+    const repReportDateEl = document.getElementById('repReportDate');
+    if (repReportDateEl) {
+        const handleReportDateChange = (e) => {
+            const val = e.target.value;
+            if (val) {
+                const parts = val.split('-');
+                if (parts.length === 3) {
+                    const yyyy = parseInt(parts[0], 10);
+                    const mm = parseInt(parts[1], 10);
+                    const moStr = parts[1];
+                    const monthStr = `${parts[0]}-${moStr}`;
+
+                    // 自動切換申報年度 (民國) 與申報月份
+                    const repYearEl = document.getElementById('repYear');
+                    const repMonthEl = document.getElementById('repMonth');
+                    if (repYearEl) repYearEl.value = yyyy - 1911;
+                    if (repMonthEl) repMonthEl.value = mm;
+
+                    // 自動更新出差起訖日為該月 1 號至月底
+                    const lastDay = new Date(yyyy, mm, 0).getDate();
+                    const repStartEl = document.getElementById('repDateRangeStart');
+                    const repEndEl = document.getElementById('repDateRangeEnd');
+                    if (repStartEl) repStartEl.value = `${parts[0]}-${moStr}-01`;
+                    if (repEndEl) repEndEl.value = `${parts[0]}-${moStr}-${String(lastDay).padStart(2, '0')}`;
+
+                    // 同步全域月份
+                    if (state.currentMonth !== monthStr) {
+                        setCurrentMonth(monthStr, false);
+                    }
+
+                    // 重新統計該月份的發票交通費並更新預覽
+                    updateTravelReportPreview(true);
+                    return;
+                }
+            }
+            updateTravelReportPreview(false);
+        };
+
+        repReportDateEl.addEventListener('change', handleReportDateChange);
+        repReportDateEl.addEventListener('input', handleReportDateChange);
+    }
 
     // Print Travel Report Button
     const btnPrintReportEl = document.getElementById('btnPrintReport');
