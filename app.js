@@ -22,20 +22,18 @@ const state = {
 // Initialization
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Initialize Month (Default to 2026-06)
-    state.currentMonth = '2026-06';
-    
-    // Set global month filter input
-    const monthFilter = document.getElementById('globalMonthFilter');
-    monthFilter.value = '2026-06';
+    // 1. Initialize Month (優先讀取上次工作月份，若無紀錄則使用當前系統真實年月)
+    const savedMonth = localStorage.getItem('invoice_helper_current_month');
+    let initialMonth = savedMonth;
+    if (!initialMonth) {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        initialMonth = `${y}-${m}`;
+    }
+    setCurrentMonth(initialMonth, true);
 
     // Set default values for Travel Report Control Panel
-    document.getElementById('repYear').value = 115;
-    document.getElementById('repMonth').value = 6;
-    
-    // Set default date range
-    document.getElementById('repDateRangeStart').value = '2026-06-01';
-    document.getElementById('repDateRangeEnd').value = '2026-06-30';
     document.getElementById('repPurpose').value = '團體健身教課';
     const empEl = document.getElementById('repEmployee');
     if (empEl) empEl.value = '林憶杰';
@@ -61,12 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('repCarCostInput').value = 0;
     document.getElementById('repOtherCostInput').value = 0;
     updateTravelReportPreview(false); // 更新預覽以反映 500 元車費
-    
-    // 初始化差旅表單日期為當月第一天
-    const travelDateEl = document.getElementById('travelDate');
-    if (travelDateEl) {
-        travelDateEl.value = '2026-06-01';
-    }
     
     // 初始化差旅交通欄位狀態
     toggleTravelTransportFields();
@@ -98,6 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初次執行 & 監聽視窗大小改變
     setTimeout(scaleReportPreview, 100);
     window.addEventListener('resize', scaleReportPreview);
+
+    // 5. 恢復上次使用的分頁 (若無紀錄則預設為儀表板)
+    const savedTab = localStorage.getItem('invoice_helper_active_tab') || 'dashboard';
+    const targetNavItem = document.querySelector(`.nav-item[data-tab="${savedTab}"]`);
+    if (targetNavItem) {
+        targetNavItem.click();
+    } else {
+        switchTab('dashboard');
+    }
 
 });
 
@@ -174,17 +175,44 @@ function saveInvoicesToStorage() {
     localStorage.setItem('invoice_helper_items', JSON.stringify(state.invoices));
 }
 
+function setCurrentMonth(monthStr, updateInputs = true) {
+    if (!monthStr) return;
+    state.currentMonth = monthStr;
+    localStorage.setItem('invoice_helper_current_month', monthStr);
+
+    const monthFilter = document.getElementById('globalMonthFilter');
+    if (monthFilter && monthFilter.value !== monthStr) {
+        monthFilter.value = monthStr;
+    }
+
+    if (updateInputs) {
+        const [yr, mo] = monthStr.split('-');
+        const yearNum = parseInt(yr, 10);
+        const monthNum = parseInt(mo, 10);
+
+        const repYearEl = document.getElementById('repYear');
+        const repMonthEl = document.getElementById('repMonth');
+        const repStartEl = document.getElementById('repDateRangeStart');
+        const repEndEl = document.getElementById('repDateRangeEnd');
+        const travelDateEl = document.getElementById('travelDate');
+
+        if (repYearEl) repYearEl.value = yearNum - 1911;
+        if (repMonthEl) repMonthEl.value = monthNum;
+
+        const lastDay = new Date(yearNum, monthNum, 0).getDate();
+        if (repStartEl) repStartEl.value = `${yr}-${mo}-01`;
+        if (repEndEl) repEndEl.value = `${yr}-${mo}-${String(lastDay).padStart(2, '0')}`;
+        if (travelDateEl) travelDateEl.value = `${yr}-${mo}-01`;
+    }
+}
+
 function autoSwitchToMonth(dateStr) {
     if (!dateStr) return;
     const match = dateStr.match(/^(\d{4}-\d{2})/);
     if (match) {
         const itemMonth = match[1];
         if (state.currentMonth !== itemMonth) {
-            state.currentMonth = itemMonth;
-            const filterEl = document.getElementById('globalMonthFilter');
-            if (filterEl) {
-                filterEl.value = itemMonth;
-            }
+            setCurrentMonth(itemMonth, true);
         }
     }
 }
@@ -237,22 +265,7 @@ function initEventListeners() {
 
     // Global Month Filter
     document.getElementById('globalMonthFilter').addEventListener('change', (e) => {
-        state.currentMonth = e.target.value;
-        
-        // Auto-update Travel Report Dates when global month changes
-        if (state.currentMonth) {
-            const [yr, mo] = state.currentMonth.split('-');
-            const yearNum = parseInt(yr);
-            const monthNum = parseInt(mo);
-            
-            document.getElementById('repYear').value = yearNum - 1911;
-            document.getElementById('repMonth').value = monthNum;
-            
-            const lastDay = new Date(yearNum, monthNum, 0).getDate();
-            document.getElementById('repDateRangeStart').value = `${yr}-${mo}-01`;
-            document.getElementById('repDateRangeEnd').value = `${yr}-${mo}-${String(lastDay).padStart(2, '0')}`;
-        }
-        
+        setCurrentMonth(e.target.value, true);
         refreshAllViews();
     });
 
@@ -379,13 +392,27 @@ function initEventListeners() {
 // Switch tabs logic
 function switchTab(tabId) {
     state.activeTab = tabId;
+    localStorage.setItem('invoice_helper_active_tab', tabId);
     
+    // Update navigation item active state
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(i => {
+        if (i.getAttribute('data-tab') === tabId) {
+            i.classList.add('active');
+        } else {
+            i.classList.remove('active');
+        }
+    });
+
     // Hide all contents
     const contents = document.querySelectorAll('.tab-content');
     contents.forEach(c => c.classList.remove('active'));
     
     // Show active content
-    document.getElementById(`tab-${tabId}`).classList.add('active');
+    const targetContent = document.getElementById(`tab-${tabId}`);
+    if (targetContent) {
+        targetContent.classList.add('active');
+    }
     
     // Update Header Text
     const title = document.getElementById('pageTitle');
