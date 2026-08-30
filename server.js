@@ -70,6 +70,53 @@ app.all('/api/logout', (req, res) => {
     }
 });
 
+// 配置資訊 API
+app.get('/api/config', (req, res) => {
+    res.json({
+        serverHasKey: Boolean(process.env.GEMINI_API_KEY),
+        defaultModel: process.env.GEMINI_MODEL || 'gemini-1.5-flash'
+    });
+});
+
+// Gemini API 代理轉發
+app.post('/api/gemini', (req, res) => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        return res.status(503).json({ error: { message: '伺服器未設定 GEMINI_API_KEY 環境變數。' } });
+    }
+
+    const payload = { ...req.body };
+    const model = payload.model || process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+    delete payload.model;
+
+    const https = require('https');
+    const dataString = JSON.stringify(payload);
+
+    const options = {
+        hostname: 'generativelanguage.googleapis.com',
+        path: `/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(dataString)
+        },
+        timeout: 30000
+    };
+
+    const proxyReq = https.request(options, (proxyRes) => {
+        res.status(proxyRes.statusCode);
+        res.set('Content-Type', 'application/json');
+        proxyRes.pipe(res);
+    });
+
+    proxyReq.on('error', (err) => {
+        res.status(500).json({ error: { message: `代理請求失敗: ${err.message}` } });
+    });
+
+    proxyReq.write(dataString);
+    proxyReq.end();
+});
+
 // 套用登入保護中間件 (對之後所有靜態資源與路徑生效)
 app.use(requireLogin);
 
