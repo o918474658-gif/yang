@@ -2287,6 +2287,7 @@ function exportCurrentReportToExcel() {
 }
 
 // 匯出當前預覽的報告表為 PDF (.pdf)
+// 匯出當前預覽的報告表為 PDF (.pdf，橫向 A4)
 function exportCurrentReportToPdf() {
     if (typeof html2pdf === 'undefined') {
         alert('PDF 匯出函式庫載入中，請稍候重試！');
@@ -2302,17 +2303,20 @@ function exportCurrentReportToPdf() {
     clone.style.transform = 'none';
     clone.style.margin = '0 auto';
     clone.style.boxShadow = 'none';
+    clone.style.width = '1000px';
 
     const wrapper = document.createElement('div');
-    wrapper.style.padding = '15px';
+    wrapper.style.width = '1000px';
+    wrapper.style.padding = '10px';
     wrapper.style.background = '#ffffff';
+    wrapper.style.boxSizing = 'border-box';
     wrapper.appendChild(clone);
 
     const opt = {
         margin: [5, 5, 5, 5],
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { scale: 2, useCORS: true, windowWidth: 1100, scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
 
@@ -2387,7 +2391,7 @@ function handleBatchExportExcel() {
     XLSX.writeFile(wb, fileName);
 }
 
-// 批次匯出勾選的報告表為 PDF (.pdf，A4 直向合併)
+// 批次匯出勾選的報告表為 PDF (.pdf，橫向 A4 多頁合併)
 function handleBatchExportPdf() {
     if (typeof html2pdf === 'undefined') {
         alert('PDF 匯出函式庫載入中，請稍候重試！');
@@ -2408,20 +2412,26 @@ function handleBatchExportPdf() {
 
     const wrapper = document.createElement('div');
     wrapper.className = 'batch-export-pdf-container';
+    wrapper.style.width = '1000px';
     wrapper.style.background = '#ffffff';
-    wrapper.style.padding = '0';
+    wrapper.style.boxSizing = 'border-box';
 
     selectedReports.forEach((report, idx) => {
         const itemDiv = document.createElement('div');
-        itemDiv.className = 'batch-report-item';
-        itemDiv.style.width = '620px';
-        itemDiv.style.margin = '0 auto 15px';
+        itemDiv.className = 'batch-report-pdf-item';
+        itemDiv.style.width = '1000px';
+        itemDiv.style.margin = '0 auto';
+        itemDiv.style.padding = '10px 0';
+        itemDiv.style.boxSizing = 'border-box';
+        itemDiv.style.pageBreakAfter = (idx < selectedReports.length - 1) ? 'always' : 'auto';
         itemDiv.style.pageBreakInside = 'avoid';
         
         const paperDiv = document.createElement('div');
         paperDiv.className = 'paper-page';
         paperDiv.style.transform = 'none';
         paperDiv.style.boxShadow = 'none';
+        paperDiv.style.width = '1000px';
+        paperDiv.style.margin = '0 auto';
         paperDiv.innerHTML = generateReportHtml(report);
         
         itemDiv.appendChild(paperDiv);
@@ -2433,8 +2443,8 @@ function handleBatchExportPdf() {
         margin: [5, 5, 5, 5],
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2canvas: { scale: 2, useCORS: true, windowWidth: 1100, scrollX: 0, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
 
     html2pdf().set(opt).from(wrapper).save();
@@ -2458,7 +2468,7 @@ window.exportDirectReportToExcel = function(id) {
     XLSX.writeFile(wb, fileName);
 };
 
-// 表格單列直接匯出 PDF
+// 表格單列直接匯出 PDF (.pdf，橫向 A4)
 window.exportDirectReportToPdf = function(id) {
     const report = state.reports.find(r => r.id === id);
     if (!report) return;
@@ -2469,13 +2479,17 @@ window.exportDirectReportToPdf = function(id) {
     }
 
     const wrapper = document.createElement('div');
-    wrapper.style.padding = '15px';
+    wrapper.style.width = '1000px';
+    wrapper.style.padding = '10px';
     wrapper.style.background = '#ffffff';
+    wrapper.style.boxSizing = 'border-box';
 
     const paperDiv = document.createElement('div');
     paperDiv.className = 'paper-page';
     paperDiv.style.transform = 'none';
     paperDiv.style.boxShadow = 'none';
+    paperDiv.style.width = '1000px';
+    paperDiv.style.margin = '0 auto';
     paperDiv.innerHTML = generateReportHtml(report);
     wrapper.appendChild(paperDiv);
 
@@ -2484,7 +2498,7 @@ window.exportDirectReportToPdf = function(id) {
         margin: [5, 5, 5, 5],
         filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { scale: 2, useCORS: true, windowWidth: 1100, scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
 
