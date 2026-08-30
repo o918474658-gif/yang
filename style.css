@@ -242,6 +242,71 @@ body {
     outline: none;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* 檢視模式切換 (膠囊按鈕組) */
+.view-mode-toggle {
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: 3px;
+    gap: 4px;
+}
+
+.btn-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-mode-toggle i {
+    width: 15px;
+    height: 15px;
+}
+
+.btn-mode-toggle:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-mode-toggle.active {
+    color: #ffffff;
+    background: var(--primary);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+}
+
+.input-select-period {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+}
+
+.input-select-period option {
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 8px;
+}
+
 .input-month::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;

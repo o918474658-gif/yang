@@ -11,6 +11,8 @@ const state = {
     },
     serverHasKey: false, // 標記伺服器端是否有設定環境變數金鑰
     currentMonth: '', // YYYY-MM
+    viewMode: 'month', // 'month' (單月) | 'period' (雙月期別)
+    currentPeriod: '', // YYYY-P[1-6]
     selectedImageBase64: null, // For previewing/submitting currently uploaded image
     activeTab: 'dashboard',
     editMode: false,
@@ -45,8 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
     loadReports();
     checkServerConfig(); // 檢查後端環境變數配置
 
+    // 初始化雙月期別選單與模式
+    const savedViewMode = localStorage.getItem('invoice_helper_view_mode') || 'month';
+    const savedPeriod = localStorage.getItem('invoice_helper_current_period') || getPeriodKeyFromMonth(state.currentMonth);
+    setCurrentPeriod(savedPeriod);
+    populatePeriodOptions();
+
     // 3. Bind UI Events
     initEventListeners();
+
+    // 還原檢視模式 (單月 / 雙月期別)
+    switchViewMode(savedViewMode);
 
     // 4. Render Initial Dashboard & Tables
     updateDashboardStats();
@@ -185,6 +196,17 @@ function setCurrentMonth(monthStr, updateInputs = true) {
         monthFilter.value = monthStr;
     }
 
+    // 自動同步期別 key
+    const autoPeriodKey = getPeriodKeyFromMonth(monthStr);
+    if (autoPeriodKey) {
+        state.currentPeriod = autoPeriodKey;
+        localStorage.setItem('invoice_helper_current_period', autoPeriodKey);
+        const periodSelect = document.getElementById('globalPeriodFilter');
+        if (periodSelect && periodSelect.value !== autoPeriodKey) {
+            periodSelect.value = autoPeriodKey;
+        }
+    }
+
     if (updateInputs) {
         const [yr, mo] = monthStr.split('-');
         const yearNum = parseInt(yr, 10);
@@ -203,6 +225,124 @@ function setCurrentMonth(monthStr, updateInputs = true) {
         if (repStartEl) repStartEl.value = `${yr}-${mo}-01`;
         if (repEndEl) repEndEl.value = `${yr}-${mo}-${String(lastDay).padStart(2, '0')}`;
         if (travelDateEl) travelDateEl.value = `${yr}-${mo}-01`;
+    }
+}
+
+// 取得指定月份所屬的雙月期別 Key (如 2026-07 -> 2026-P4)
+function getPeriodKeyFromMonth(monthStr) {
+    if (!monthStr) return '';
+    const parts = monthStr.split('-');
+    if (parts.length < 2) return '';
+    const yr = parts[0];
+    const m = parseInt(parts[1], 10);
+    const p = Math.ceil(m / 2);
+    return `${yr}-P${p}`;
+}
+
+// 取得雙月期別所涵蓋的兩個月份 (如 2026-P4 -> ['2026-07', '2026-08'])
+function getPeriodMonths(periodKey) {
+    if (!periodKey) return [];
+    const parts = periodKey.split('-P');
+    if (parts.length < 2) return [];
+    const yr = parts[0];
+    const p = parseInt(parts[1], 10);
+    const startMo = String(p * 2 - 1).padStart(2, '0');
+    const endMo = String(p * 2).padStart(2, '0');
+    return [`${yr}-${startMo}`, `${yr}-${endMo}`];
+}
+
+// 取得雙月期別中文標籤 (如 115年 第4期 (07-08月) 營業稅申報)
+function getPeriodLabel(periodKey) {
+    if (!periodKey) return '';
+    const parts = periodKey.split('-P');
+    if (parts.length < 2) return '';
+    const yr = parts[0];
+    const yNum = parseInt(yr, 10);
+    const p = parseInt(parts[1], 10);
+    const startMo = String(p * 2 - 1).padStart(2, '0');
+    const endMo = String(p * 2).padStart(2, '0');
+    const rocYear = yNum - 1911;
+    return `${rocYear}年 第${p}期 (${startMo}-${endMo}月) 營業稅申報`;
+}
+
+// 初始化/更新雙月期別下拉選單選項
+function populatePeriodOptions() {
+    const select = document.getElementById('globalPeriodFilter');
+    if (!select) return;
+
+    const currentYear = new Date().getFullYear();
+    const yearsSet = new Set([currentYear, currentYear - 1, currentYear + 1]);
+    state.invoices.forEach(inv => {
+        if (inv.date) {
+            const y = parseInt(inv.date.slice(0, 4), 10);
+            if (!isNaN(y)) yearsSet.add(y);
+        }
+    });
+
+    const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
+    select.innerHTML = '';
+
+    sortedYears.forEach(year => {
+        for (let p = 6; p >= 1; p--) {
+            const pKey = `${year}-P${p}`;
+            const opt = document.createElement('option');
+            opt.value = pKey;
+            opt.innerText = getPeriodLabel(pKey);
+            select.appendChild(opt);
+        }
+    });
+
+    if (state.currentPeriod) {
+        select.value = state.currentPeriod;
+    }
+}
+
+// 設定當前雙月期別
+function setCurrentPeriod(periodKey) {
+    if (!periodKey) return;
+    state.currentPeriod = periodKey;
+    localStorage.setItem('invoice_helper_current_period', periodKey);
+
+    const select = document.getElementById('globalPeriodFilter');
+    if (select && select.value !== periodKey) {
+        select.value = periodKey;
+    }
+}
+
+// 切換檢視模式 ('month' 或 'period')
+function switchViewMode(mode) {
+    state.viewMode = mode;
+    localStorage.setItem('invoice_helper_view_mode', mode);
+
+    const btnMonthly = document.getElementById('btnModeMonthly');
+    const btnPeriod = document.getElementById('btnModePeriod');
+    const monthlyWrap = document.getElementById('monthlySelectorWrapper');
+    const periodWrap = document.getElementById('periodSelectorWrapper');
+
+    if (btnMonthly) btnMonthly.classList.toggle('active', mode === 'month');
+    if (btnPeriod) btnPeriod.classList.toggle('active', mode === 'period');
+    if (monthlyWrap) monthlyWrap.classList.toggle('hidden', mode !== 'month');
+    if (periodWrap) periodWrap.classList.toggle('hidden', mode !== 'period');
+
+    if (mode === 'period') {
+        // 若切換到雙月期別，確保期別與當前月份對齊
+        if (!state.currentPeriod || !getPeriodMonths(state.currentPeriod).includes(state.currentMonth)) {
+            setCurrentPeriod(getPeriodKeyFromMonth(state.currentMonth));
+        }
+        populatePeriodOptions();
+    } else {
+        // 若切換回單月，若當前月份不在當前期別內，自動設為該期別的第一個月
+        if (state.currentPeriod) {
+            const months = getPeriodMonths(state.currentPeriod);
+            if (!months.includes(state.currentMonth)) {
+                setCurrentMonth(months[0], true);
+            }
+        }
+    }
+
+    refreshAllViews();
+    if (window.lucide) {
+        lucide.createIcons();
     }
 }
 
@@ -268,6 +408,25 @@ function initEventListeners() {
         setCurrentMonth(e.target.value, true);
         refreshAllViews();
     });
+
+    // View Mode Toggle (單月檢視 vs 雙月期別)
+    const btnModeMonthly = document.getElementById('btnModeMonthly');
+    const btnModePeriod = document.getElementById('btnModePeriod');
+    if (btnModeMonthly) {
+        btnModeMonthly.addEventListener('click', () => switchViewMode('month'));
+    }
+    if (btnModePeriod) {
+        btnModePeriod.addEventListener('click', () => switchViewMode('period'));
+    }
+
+    // Global Period Filter (雙月期別變更)
+    const periodFilter = document.getElementById('globalPeriodFilter');
+    if (periodFilter) {
+        periodFilter.addEventListener('change', (e) => {
+            setCurrentPeriod(e.target.value);
+            refreshAllViews();
+        });
+    }
 
     // API Settings Modal triggers
     document.getElementById('openSettingsBtn').addEventListener('click', openSettingsModal);
@@ -513,6 +672,23 @@ function updateDashboardStats() {
     const inwardTax = Math.round(totalReimburse * 5 / 105);
     const estimatedVat = outwardTax > inwardTax ? (outwardTax - inwardTax) : 0;
 
+    // 更新卡片標籤 (單月檢視 vs 雙月期別申報)
+    const isPeriod = state.viewMode === 'period';
+    const periodNum = isPeriod && state.currentPeriod ? state.currentPeriod.split('-P')[1] : '';
+    const prefix = isPeriod ? '本期' : '本月';
+
+    const lblInward = document.getElementById('lblStatInward');
+    const lblOutward = document.getElementById('lblStatOutward');
+    const lblTravel = document.getElementById('lblStatTravel');
+    const lblTotal = document.getElementById('lblStatTotal');
+    const lblTax = document.getElementById('lblStatTax');
+
+    if (lblInward) lblInward.innerText = `${prefix}收到發票 (進項)`;
+    if (lblOutward) lblOutward.innerText = `${prefix}開出發票 (銷項)`;
+    if (lblTravel) lblTravel.innerText = `${prefix}出差交通費`;
+    if (lblTotal) lblTotal.innerText = `${prefix}報銷總金額`;
+    if (lblTax) lblTax.innerText = isPeriod ? `預估本期應納營業稅 (第${periodNum}期)` : `預估應納營業稅`;
+
     document.getElementById('statInwardAmount').innerText = `$${inwardTotal.toLocaleString()}`;
     document.getElementById('statInwardCount').innerText = `${inwardCount} 張發票`;
     
@@ -526,7 +702,9 @@ function updateDashboardStats() {
     document.getElementById('statTotalCount').innerText = `共 ${totalCount} 筆明細`;
 
     document.getElementById('statTaxAmount').innerText = `$${estimatedVat.toLocaleString()}`;
-    document.getElementById('statTaxFormula').innerText = `銷項稅: $${outwardTax.toLocaleString()} - 進項稅: $${inwardTax.toLocaleString()} (5%)`;
+    document.getElementById('statTaxFormula').innerText = isPeriod
+        ? `銷項稅: $${outwardTax.toLocaleString()} - 進項稅: $${inwardTax.toLocaleString()} (5% 雙月申報)`
+        : `銷項稅: $${outwardTax.toLocaleString()} - 進項稅: $${inwardTax.toLocaleString()} (5%)`;
 }
 
 function renderRecentInvoices() {
@@ -1332,8 +1510,14 @@ function updateTravelReportPreview(autoFillFromInvoices = false) {
 // Helper Utility Functions
 // ==========================================================================
 function getInvoicesForCurrentMonth() {
-    if (!state.currentMonth) return state.invoices;
-    return state.invoices.filter(item => item.date.startsWith(state.currentMonth));
+    if (state.viewMode === 'period') {
+        const months = getPeriodMonths(state.currentPeriod);
+        if (!months || months.length === 0) return state.invoices;
+        return state.invoices.filter(item => months.some(m => item.date.startsWith(m)));
+    } else {
+        if (!state.currentMonth) return state.invoices;
+        return state.invoices.filter(item => item.date.startsWith(state.currentMonth));
+    }
 }
 
 function escapeHtml(text) {
@@ -1349,7 +1533,8 @@ function escapeHtml(text) {
 function exportToCsv() {
     const filtered = getInvoicesForCurrentMonth();
     if (filtered.length === 0) {
-        alert('當月沒有發票資料可供匯出。');
+        const msg = state.viewMode === 'period' ? '所選雙月期別沒有發票資料可供匯出。' : '所選月份沒有發票資料可供匯出。';
+        alert(msg);
         return;
     }
 

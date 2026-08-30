@@ -56,9 +56,28 @@
                     <p id="pageSubtitle">歡迎使用！在這裡查看您的發票整理進度與統計資訊。</p>
                 </div>
                 <div class="header-actions">
-                    <div class="month-selector-wrapper">
+                    <!-- 檢視模式切換 (單月 vs 雙月期別) -->
+                    <div class="view-mode-toggle" id="viewModeToggle">
+                        <button type="button" class="btn-mode-toggle active" id="btnModeMonthly" title="依單一月份檢視與統計">
+                            <i data-lucide="calendar"></i>
+                            <span>單月檢視</span>
+                        </button>
+                        <button type="button" class="btn-mode-toggle" id="btnModePeriod" title="依台灣營業稅雙月申報期別 (1-2月、3-4月、5-6月、7-8月...) 檢視與結算">
+                            <i data-lucide="layers"></i>
+                            <span>雙月期別 (營業稅)</span>
+                        </button>
+                    </div>
+
+                    <!-- 單月選擇器 -->
+                    <div class="month-selector-wrapper" id="monthlySelectorWrapper">
                         <i data-lucide="calendar"></i>
                         <input type="month" id="globalMonthFilter" class="input-month">
+                    </div>
+
+                    <!-- 雙月期別選擇器 -->
+                    <div class="month-selector-wrapper hidden" id="periodSelectorWrapper">
+                        <i data-lucide="layers"></i>
+                        <select id="globalPeriodFilter" class="input-select-period"></select>
                     </div>
                 </div>
             </header>
@@ -72,7 +91,7 @@
                             <i data-lucide="arrow-down-left"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-label">本月收到發票 (進項)</span>
+                            <span class="stat-label" id="lblStatInward">本月收到發票 (進項)</span>
                             <span class="stat-value" id="statInwardAmount">$0</span>
                             <span class="stat-subtext" id="statInwardCount">0 張發票</span>
                         </div>
@@ -82,7 +101,7 @@
                             <i data-lucide="arrow-up-right"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-label">本月開出發票 (銷項)</span>
+                            <span class="stat-label" id="lblStatOutward">本月開出發票 (銷項)</span>
                             <span class="stat-value" id="statOutwardAmount">$0</span>
                             <span class="stat-subtext" id="statOutwardCount">0 張發票</span>
                         </div>
@@ -92,7 +111,7 @@
                             <i data-lucide="train"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-label">本月出差交通費</span>
+                            <span class="stat-label" id="lblStatTravel">本月出差交通費</span>
                             <span class="stat-value" id="statTravelAmount">$0</span>
                             <span class="stat-subtext" id="statTravelCount">0 筆憑證</span>
                         </div>
@@ -102,7 +121,7 @@
                             <i data-lucide="wallet"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-label">本月報銷總金額</span>
+                            <span class="stat-label" id="lblStatTotal">本月報銷總金額</span>
                             <span class="stat-value" id="statTotalReimburse">$0</span>
                             <span class="stat-subtext" id="statTotalCount">共 0 筆明細</span>
                         </div>
@@ -112,7 +131,7 @@
                             <i data-lucide="percent"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-label">預估應納營業稅</span>
+                            <span class="stat-label" id="lblStatTax">預估應納營業稅</span>
                             <span class="stat-value" id="statTaxAmount">$0</span>
                             <span class="stat-subtext" id="statTaxFormula">銷項稅: $0 - 進項稅: $0 (5%)</span>
                         </div>
